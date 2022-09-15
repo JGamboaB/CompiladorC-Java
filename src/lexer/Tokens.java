@@ -9,13 +9,9 @@ package lexer;
  * @author Sara
  */
 public enum Tokens {
-    Reservadas,
-    Igual,
-    Suma,
-    Resta,
-    Multiplicacion,
-    Division,
-    Identificador,
-    Numero,
+    RESERVED,
+    OPERATOR,
+    IDENTIFIER,
+    LITERAL,
     ERROR   
 }
