@@ -121,7 +121,7 @@ CommentContent       = ( [^*] | \*+ [^/*] )*
 {WhiteSpace} { /* ignore */ }
 
 
-{L}({L}|{D})* {lexeme=yytext(); return IDENTIFIER;}
+{L}({L}|{D})* {lexeme=yytext(); return IDENTIFIER;} 
 
 /* LITERALS */
 L?\"(\\.|[^\\"])*\"	{lexeme=yytext(); return(LITERAL); }
