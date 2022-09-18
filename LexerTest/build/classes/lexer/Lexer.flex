@@ -11,12 +11,14 @@ import lexer.Token;
 
   StringBuffer string = new StringBuffer();
 
+  public String lexeme;
+
   private Token createToken(KindToken kindToken){
-    return new Token(kindToken, yyline);
+    return new Token(kindToken, yyline+1);
   }
 
-  private Token createStringValueToken(KindToken kindToken, String value){
-    return new TokenStringValue(kindToken, yyline, value);
+  private TokenStringValue createStringValueToken(KindToken kindToken, String value){
+    return new TokenStringValue(kindToken, yyline+1, value);
   }
 
 %}
@@ -35,109 +37,109 @@ CommentContent       = ( [^*] | \*+ [^/*] )*
 
 Identifier = [:jletter:] [:jletterdigit:]* 
 
-DecIntegerLiteral = -?0 | -?[1-9][0-9]*
+DecIntegerLiteral = -?0|-?[1-9][0-9]*
 OctIntegerLiteral = -?0[0-9]+
 HexIntegerLiteral = -?0[xX][0-9A-Fa-f]+
-FloatIntegerLiteral = -?[0-9]*.[0-9]+[eE]?-?[0-9]*
+FloatIntegerLiteral = -?[0-9]*\.[0-9]+([eE]-?[0-9]*)?
 
 %state STRING
 
 %%
 
 /* keywords */
-<YYINITIAL> "auto"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "break"          { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "case"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "char"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "const"          { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "continue"       { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "default"        { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "do"             { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "double"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "else"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "enum"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "extern"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "float"          { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "goto"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "if"             { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "int"            { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "long"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "register"       { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "return"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "short"          { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "signed"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "sizeof"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "static"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "struct"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "switch"         { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "typedef"        { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "union"          { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "unsigned"       { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "void"           { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "volatile"       { return createToken(KindToken.RESERVED_WORD); }
-<YYINITIAL> "while"          { return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "auto"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "break"          { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "case"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "char"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "const"          { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "continue"       { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "default"        { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "do"             { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "double"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "else"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "enum"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "extern"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "float"          { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "goto"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "if"             { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "int"            { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "long"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "register"       { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "return"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "short"          { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "signed"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "sizeof"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "static"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "struct"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "switch"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "typedef"        { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "union"          { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "unsigned"       { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "void"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "volatile"       { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "while"          { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
 
 
 <YYINITIAL> {
   /* identifiers */ 
-  {Identifier}                   { return createToken(KindToken.IDENTIFIER); }
+  {Identifier}                   { lexeme=yytext(); return createToken(KindToken.IDENTIFIER); }
    
   /* literals */
-  {DecIntegerLiteral}            { return createToken(KindToken.LITERAL); }
-  {OctIntegerLiteral}            { return createToken(KindToken.LITERAL); }
-  {HexIntegerLiteral}            { return createToken(KindToken.LITERAL); }
-  {FloatIntegerLiteral}          { return createToken(KindToken.LITERAL); }
+  {DecIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
+  {OctIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
+  {HexIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
+  {FloatIntegerLiteral}          { lexeme=yytext(); return createToken(KindToken.LITERAL); }
 
 
   \"                             { string.setLength(0); yybegin(STRING); }
 
   /* operators */
   "//".*                         {/*Ignore*/}
-  ","                            {return createToken(KindToken.OPERATOR);}
-  ";"                            {return createToken(KindToken.OPERATOR);}
-  "++"                           {return createToken(KindToken.OPERATOR);}
-  "--"                           {return createToken(KindToken.OPERATOR);}
-  "=="                           {return createToken(KindToken.OPERATOR);}
-  ">="                           {return createToken(KindToken.OPERATOR);}
-  ">"                            {return createToken(KindToken.OPERATOR);}
-  "?"                            {return createToken(KindToken.OPERATOR);}
-  "<="                           {return createToken(KindToken.OPERATOR);}
-  "<"                            {return createToken(KindToken.OPERATOR);}
-  "!="                           {return createToken(KindToken.OPERATOR);}
-  "||"                           {return createToken(KindToken.OPERATOR);}
-  "&&"                           {return createToken(KindToken.OPERATOR);}
-  "!"                            {return createToken(KindToken.OPERATOR);}
-  "="                            {return createToken(KindToken.OPERATOR);}
-  "+"                            {return createToken(KindToken.OPERATOR);}
-  "-"                            {return createToken(KindToken.OPERATOR);}
-  "*"                            {return createToken(KindToken.OPERATOR);}
-  "/"                            {return createToken(KindToken.OPERATOR);}
-  "%"                            {return createToken(KindToken.OPERATOR);}
-  "("                            {return createToken(KindToken.OPERATOR);}
-  ")"                            {return createToken(KindToken.OPERATOR);}
-  "["                            {return createToken(KindToken.OPERATOR);}
-  "]"                            {return createToken(KindToken.OPERATOR);}
-  "{"                            {return createToken(KindToken.OPERATOR);}
-  "}"                            {return createToken(KindToken.OPERATOR);}
-  ":"                            {return createToken(KindToken.OPERATOR);}
-  "."                            {return createToken(KindToken.OPERATOR);}
-  "+="                           {return createToken(KindToken.OPERATOR);}
-  "-="                           {return createToken(KindToken.OPERATOR);}
-  "*="                           {return createToken(KindToken.OPERATOR);}
-  "/="                           {return createToken(KindToken.OPERATOR);}
-  "&"                            {return createToken(KindToken.OPERATOR);}
-  "^"                            {return createToken(KindToken.OPERATOR);}
-  "|"                            {return createToken(KindToken.OPERATOR);}
-  ">>"                           {return createToken(KindToken.OPERATOR);}
-  "<<"                           {return createToken(KindToken.OPERATOR);}
-  "~"                            {return createToken(KindToken.OPERATOR);}
-  "%="                           {return createToken(KindToken.OPERATOR);}
-  "&="                           {return createToken(KindToken.OPERATOR);}
-  "^="                           {return createToken(KindToken.OPERATOR);}
-  "|="                           {return createToken(KindToken.OPERATOR);}
-  "<<="                          {return createToken(KindToken.OPERATOR);}
-  ">>="                          {return createToken(KindToken.OPERATOR);}
-  "->"                           {return createToken(KindToken.OPERATOR);}
+  ","                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  ";"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "++"                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "--"                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "=="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  ">="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  ">"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "?"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "<="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "<"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "!="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "||"                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "&&"                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "!"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "="                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "+"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "-"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "*"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "/"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "%"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "("                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  ")"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "["                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "]"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "{"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "}"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  ":"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "."                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "+="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "-="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "*="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "/="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "&"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "^"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "|"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  ">>"                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "<<"                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "~"                            { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "%="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "&="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "^="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "|="                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "<<="                          { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  ">>="                          { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
+  "->"                           { lexeme=yytext(); return createToken(KindToken.OPERATOR);}
 
 
   /* comments */
@@ -159,5 +161,5 @@ FloatIntegerLiteral = -?[0-9]*.[0-9]+[eE]?-?[0-9]*
 
 /* error fallback */
 [^]                              { throw new Error("Illegal character <"+yytext()+">"); }
-.                                {return createToken(KindToken.ERROR);}
+.                                { lexeme=yytext(); createToken(KindToken.ERROR);}
 

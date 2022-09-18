@@ -1,7 +1,14 @@
 package lexer;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.table.DefaultTableModel;
 
@@ -158,8 +165,45 @@ public class JFrame extends javax.swing.JFrame {
     private void jButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonActionPerformed
         JFileChooser chooser = new JFileChooser();
         chooser.showOpenDialog(null);
+        
         File f = chooser.getSelectedFile();
         String filename = f.getAbsolutePath();
+        
+        try {
+            Reader reader = new BufferedReader(new FileReader(filename));
+            Lexer lexer = new Lexer(reader);
+            String result = "";
+            
+            while(true){
+                Token token = lexer.yylex();
+                if (token == null){
+                    result += "END";
+                    System.out.println(result);
+                    return;
+                }
+                switch(token.kindToken){
+                    case RESERVED_WORD:
+                        result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
+                    case IDENTIFIER:
+                        result += lexer.lexeme + ": IDENTIFIER\t Line: "+token.line+"\n"; break;
+                    case LITERAL:
+                        result += lexer.lexeme + ": LITERAL\t Line: "+token.line+"\n"; break;
+                    case OPERATOR:
+                        result += lexer.lexeme + ": OPERATOR\t Line: "+token.line+"\n"; break;
+                    default:
+                        result += "Token: " + token + "\n";
+                        break;
+                }
+        
+            }
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
         System.out.println(filename);
     }//GEN-LAST:event_jButtonActionPerformed
 
