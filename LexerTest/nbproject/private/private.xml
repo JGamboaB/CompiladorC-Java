@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/TokenIntValue.java</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/Main.java</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/TokenStringValue.java</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/Lexer.flex</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/KindToken.java</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/Lexer-dummy.txt</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/Token.java</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/TokenFloatValue.java</file>
+            <file>file:/C:/Users/Sara/Documents/NetBeansProjects/LexerTest/src/lexer/Lexer.java</file>
+        </group>
+    </open-files>
+</project-private>
