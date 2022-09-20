@@ -173,28 +173,33 @@ public class JFrame extends javax.swing.JFrame {
             Reader reader = new BufferedReader(new FileReader(filename));
             Lexer lexer = new Lexer(reader);
             String result = "";
+            String errors = "";
             
-            while(true){
-                Token token = lexer.yylex();
-                if (token == null){
-                    result += "END";
-                    System.out.println(result);
-                    return;
+            while(true){                
+                try {
+                    Token token = lexer.yylex();
+                    if (token == null){
+                        result += "END";
+                        System.out.println(result);
+                        System.out.println(errors);
+                        return;
+                    }
+                    switch (token.kindToken){
+                        case RESERVED_WORD:
+                            result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
+                        case IDENTIFIER:
+                            result += lexer.lexeme + ": IDENTIFIER\t Line: "+token.line+"\n"; break;
+                        case LITERAL:
+                            result += lexer.lexeme + ": LITERAL\t Line: "+token.line+"\n"; break;
+                        case OPERATOR:
+                            result += lexer.lexeme + ": OPERATOR\t Line: "+token.line+"\n"; break;
+                        default:
+                            result += "Token: " + token + "\n";
+                            break;
+                    }
+                } catch(LexicalError ex) {
+                    errors += ex.getMessage() +"\t Line: "+ex.getLine()+"\n";
                 }
-                switch(token.kindToken){
-                    case RESERVED_WORD:
-                        result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
-                    case IDENTIFIER:
-                        result += lexer.lexeme + ": IDENTIFIER\t Line: "+token.line+"\n"; break;
-                    case LITERAL:
-                        result += lexer.lexeme + ": LITERAL\t Line: "+token.line+"\n"; break;
-                    case OPERATOR:
-                        result += lexer.lexeme + ": OPERATOR\t Line: "+token.line+"\n"; break;
-                    default:
-                        result += "Token: " + token + "\n";
-                        break;
-                }
-        
             }
             
         } catch (FileNotFoundException ex) {

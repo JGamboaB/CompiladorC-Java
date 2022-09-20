@@ -21,6 +21,11 @@ import lexer.Token;
     return new TokenStringValue(kindToken, yyline+1, value);
   }
 
+  private LexicalError createLexicalError(String message){
+    return new LexicalError(message,yyline+1);
+    
+  }
+
 %}
 
 LineTerminator = \r|\n|\r\n
@@ -35,12 +40,16 @@ EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment = "/**" {CommentContent} "*"+ "/"
 CommentContent       = ( [^*] | \*+ [^/*] )*
 
-Identifier = [:jletter:] [:jletterdigit:]* 
+Identifier = [a-zA-Z_][a-zA-Z_0-9]* 
 
 DecIntegerLiteral = 0|[1-9][0-9]*
 OctIntegerLiteral = 0[0-9]+
 HexIntegerLiteral = 0[xX][0-9A-Fa-f]+
 FloatIntegerLiteral = [0-9]*\.[0-9]+([eE]-?[0-9]+)?
+
+Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {FloatIntegerLiteral}
+
+WrongSymbol = {Number} {Identifier}
 
 %state STRING
 
@@ -84,6 +93,9 @@ FloatIntegerLiteral = [0-9]*\.[0-9]+([eE]-?[0-9]+)?
   /* identifiers */ 
   {Identifier}                   { lexeme=yytext(); return createToken(KindToken.IDENTIFIER); }
    
+  /* error fallback */
+  {WrongSymbol}                  { throw createLexicalError("Illegal character <"+yytext()+">"); }
+
   /* literals */
   {DecIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
   {OctIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
@@ -160,6 +172,8 @@ FloatIntegerLiteral = [0-9]*\.[0-9]+([eE]-?[0-9]+)?
 }
 
 /* error fallback */
-[^]                              { throw new Error("Illegal character <"+yytext()+">"); }
-.                                { lexeme=yytext(); createToken(KindToken.ERROR);}
+[^]                              { throw createLexicalError("Illegal character <"+yytext()+">"); }
 
+/*
+.                                { lexeme=yytext(); createToken(KindToken.ERROR);}
+*/
