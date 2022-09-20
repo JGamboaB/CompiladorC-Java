@@ -174,7 +174,7 @@ public class JFrame extends javax.swing.JFrame {
             Lexer lexer = new Lexer(reader);
             String result = "";
             String errors = "";
-            
+            TokenCounter tokenCounter = new TokenCounter();
             while(true){                
                 try {
                     Token token = lexer.yylex();
@@ -182,8 +182,10 @@ public class JFrame extends javax.swing.JFrame {
                         result += "END";
                         System.out.println(result);
                         System.out.println(errors);
+                        System.out.println(tokenCounter.toString());
                         return;
                     }
+                    tokenCounter.countToken(lexer.lexeme, token.kindToken.toString(),token.line);
                     switch (token.kindToken){
                         case RESERVED_WORD:
                             result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
