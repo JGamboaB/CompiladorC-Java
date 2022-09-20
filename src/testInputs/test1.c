@@ -6,6 +6,7 @@ int main()
 
 {   
     int hi = 2-1;
+	*char aStringTest = "hello this is a string";
 	int firstMatrix[10][10], secondMatrix[10][10], mult[10][10], rowFirst, columnFirst, rowSecond, columnSecond, i, j, k;
 
 	printf("Enter rows and column for first matrix: ");

@@ -150,7 +150,7 @@ FloatIntegerLiteral = [0-9]*\.[0-9]+([eE]-?[0-9]+)?
 }
 
 <STRING> {
-  \"                             { yybegin(YYINITIAL); return createStringValueToken(KindToken.LITERAL, string.toString()); }
+  \"                             { yybegin(YYINITIAL); lexeme=string.toString(); return createStringValueToken(KindToken.LITERAL, string.toString()); }
   [^\n\r\"\\]+                   { string.append( yytext() ); }
   \\t                            { string.append('\t'); }
   \\n                            { string.append('\n'); }
