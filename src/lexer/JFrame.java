@@ -201,7 +201,7 @@ public class JFrame extends javax.swing.JFrame {
             Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
         
         
         System.out.println(filename);

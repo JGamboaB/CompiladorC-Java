@@ -37,10 +37,10 @@ CommentContent       = ( [^*] | \*+ [^/*] )*
 
 Identifier = [:jletter:] [:jletterdigit:]* 
 
-DecIntegerLiteral = -?0|-?[1-9][0-9]*
-OctIntegerLiteral = -?0[0-9]+
-HexIntegerLiteral = -?0[xX][0-9A-Fa-f]+
-FloatIntegerLiteral = -?[0-9]*\.[0-9]+([eE]-?[0-9]*)?
+DecIntegerLiteral = 0|[1-9][0-9]*
+OctIntegerLiteral = 0[0-9]+
+HexIntegerLiteral = 0[xX][0-9A-Fa-f]+
+FloatIntegerLiteral = [0-9]*\.[0-9]+([eE]-?[0-9]+)?
 
 %state STRING
 
