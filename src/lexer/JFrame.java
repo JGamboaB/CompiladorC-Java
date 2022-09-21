@@ -169,6 +169,7 @@ public class JFrame extends javax.swing.JFrame {
         File f = chooser.getSelectedFile();
         String filename = f.getAbsolutePath();
         
+        
         try {
             Reader reader = new BufferedReader(new FileReader(filename));
             Lexer lexer = new Lexer(reader);
@@ -185,7 +186,7 @@ public class JFrame extends javax.swing.JFrame {
                         System.out.println(tokenCounter.toString());
                         return;
                     }
-                    tokenCounter.countToken(lexer.lexeme, token.kindToken.toString(),token.line);
+                    tokenCounter.countToken(token);
                     switch (token.kindToken){
                         case RESERVED_WORD:
                             result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
@@ -203,12 +204,15 @@ public class JFrame extends javax.swing.JFrame {
                     errors += ex.getMessage() +"\t Line: "+ex.getLine()+"\n";
                 }
             }
+           
             
         } catch (FileNotFoundException ex) {
             Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
         } 
+        
+         
         
         
         System.out.println(filename);

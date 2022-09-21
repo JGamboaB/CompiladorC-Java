@@ -5,44 +5,77 @@
 package lexer;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  *
  * @author Sara
  */
 public class TokenCounter {
-    private HashMap<String, Integer> counter = new HashMap<>() ;
+    private HashMap<Token, Integer> counter = new HashMap<>() ;
     
-    public void countToken(String tokenValue, String tokenKind, int line){
-        String key = tokenValue + "/" + tokenKind + "/" +line;
-        if(counter.containsKey(key)){
-            counter.put(key, counter.get(key)+1);
+    public void countToken(Token token){
+        if(counter.containsKey(token)){
+            counter.put(token, counter.get(token)+1);
             return;
         }
-        counter.put(key, 1);
+        counter.put(token, 1);
     }  
     
     
-    // todo: decirle a juan de estos metodos y ver como usarlos en la tabla
     
-    public String getTokenValue(String token){    
-       return token.split("/")[0];
+    public String getTokenValue(Token token){    
+       return token.value;
     }
     
-    public String getTokenKind(String token){
-       return token.split("/")[1];
+    public String getTokenKind(Token token){
+       return token.kindToken.toString();
     }
     
-    public String getTokenLine(String token){
-       return token.split("/")[2]; 
+    public String getTokenLine(Token token){
+       return String.valueOf(token.line);
+               
+    }
+    
+    public HashMap<Integer, Integer> getLinesByTokenValue(String value, KindToken kindToken){
+        HashMap<Integer, Integer> result = new HashMap<>();
+        for (Token token : this.counter.keySet()) {
+            if (token.value.equals(value) && token.kindToken == kindToken) {
+                result.put(token.line, this.counter.get(token));
+            }
+        }
+        return result;
     }
 
-    @Override // fix this
-    public String toString(){
-        String result = "hola";
-        for (String token : counter.keySet()) {
-            result = result.concat(this.getTokenValue(token)+"\t"+this.getTokenKind(token)+"\t"+this.getTokenLine(token));
+    
+    public String getFormattedLines (HashMap<Integer, Integer> lines){
+        String lineString = "";
+        for (Integer line : lines.keySet() ){
+
+            if (lines.get(line)> 1){
+                lineString += line + "(" +lines.get(line) + "), "; 
+            }else{
+                lineString += line + ", "; 
+            }
         }
+        return lineString;
+    }
+    
+    @Override 
+    public String toString(){
+        String result = ">>";
+        
+        
+        HashSet<HashMap<Integer, Integer>> analizados = new HashSet<>();
+        for (Token token : this.counter.keySet()) {
+            HashMap<Integer, Integer> lines = getLinesByTokenValue(token.value, token.kindToken);
+            if (!analizados.contains(lines)){
+                analizados.add(lines);
+                result += "\ttoken: " + token.value + "\ttipo: " + token.kindToken + "\tlinea: " + getFormattedLines(lines)+"\n";
+            }
+            
+        }
+        
         return result;
     }
 }

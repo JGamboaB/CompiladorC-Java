@@ -14,11 +14,11 @@ import lexer.Token;
   public String lexeme;
 
   private Token createToken(KindToken kindToken){
-    return new Token(kindToken, yyline+1);
+    return new Token(yytext(),kindToken, yyline+1);
   }
 
-  private TokenStringValue createStringValueToken(KindToken kindToken, String value){
-    return new TokenStringValue(kindToken, yyline+1, value);
+  private Token createStringValueToken(KindToken kindToken, String value){
+    return new Token(value, kindToken, yyline+1);
   }
 
   private LexicalError createLexicalError(String message){
