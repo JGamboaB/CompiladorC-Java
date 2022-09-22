@@ -7,6 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -19,25 +22,18 @@ public class JFrame extends javax.swing.JFrame {
      */
     public JFrame() {
         initComponents();
-        populateMainTable();
-        populateErrorsTable();
     }
     
-    public void populateMainTable(){
+    public void populateMainTable(HashSet<String[]> tokens){
         String[] columns = {"Token", "Type", "Amount", "Line(s)"};
-        String[][] data = {
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"},
-            {"Test","TEST","2","1,2"},{"Test2","TEST","3","1,2(2)"}
-        };
+        String[][] data = new String[tokens.size()][4];
+        
+        Iterator<String[]> it = tokens.iterator(); int i = 0;
+        while(it.hasNext()){
+            String[] current = it.next();
+            data[i++] = current;
+        }
+        
         DefaultTableModel model = new DefaultTableModel(data,columns){
 
             @Override
@@ -51,11 +47,17 @@ public class JFrame extends javax.swing.JFrame {
         tableMain.setBackground(Color.lightGray);
     };
     
-    public void populateErrorsTable(){
+    public void populateErrorsTable(HashSet<LexicalError> errors){
         String[] columns = {"Token", "Line(s)"};
-        String[][] data = {
-            {"Test","2"},{"Test2","4"}
-        };
+        String[][] data = new String[errors.size()][2];
+        
+        Iterator<LexicalError> it = errors.iterator(); int i = 0;
+        while (it.hasNext()){
+            LexicalError current = it.next();
+            data[i][0] = current.getMessage();
+            data[i++][1] = String.valueOf(current.getLine());
+        }
+        
         DefaultTableModel model = new DefaultTableModel(data,columns){
 
             @Override
@@ -173,36 +175,25 @@ public class JFrame extends javax.swing.JFrame {
         try {
             Reader reader = new BufferedReader(new FileReader(filename));
             Lexer lexer = new Lexer(reader);
-            String result = "";
-            String errors = "";
+            HashSet<LexicalError> errors = new HashSet<>();
             TokenCounter tokenCounter = new TokenCounter();
+            
             while(true){                
                 try {
                     Token token = lexer.yylex();
                     if (token == null){
-                        result += "END";
-                        System.out.println(result);
                         System.out.println(errors);
                         System.out.println(tokenCounter.toString());
+                        populateMainTable(tokenCounter.getTokens());
                         return;
                     }
                     tokenCounter.countToken(token);
-                    switch (token.kindToken){
-                        case RESERVED_WORD:
-                            result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
-                        case IDENTIFIER:
-                            result += lexer.lexeme + ": IDENTIFIER\t Line: "+token.line+"\n"; break;
-                        case LITERAL:
-                            result += lexer.lexeme + ": LITERAL\t Line: "+token.line+"\n"; break;
-                        case OPERATOR:
-                            result += lexer.lexeme + ": OPERATOR\t Line: "+token.line+"\n"; break;
-                        default:
-                            result += "Token: " + token + "\n";
-                            break;
-                    }
+                    
+
                 } catch(LexicalError ex) {
-                    errors += ex.getMessage() +"\t Line: "+ex.getLine()+"\n";
+                    errors.add(ex);        
                 }
+                populateErrorsTable(errors);
             }
            
             

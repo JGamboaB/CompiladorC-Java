@@ -65,7 +65,6 @@ public class TokenCounter {
     public String toString(){
         String result = ">>";
         
-        
         HashSet<HashMap<Integer, Integer>> analizados = new HashSet<>();
         for (Token token : this.counter.keySet()) {
             HashMap<Integer, Integer> lines = getLinesByTokenValue(token.value, token.kindToken);
@@ -73,9 +72,33 @@ public class TokenCounter {
                 analizados.add(lines);
                 result += "\ttoken: " + token.value + "\ttipo: " + token.kindToken + "\tlinea: " + getFormattedLines(lines)+"\n";
             }
-            
+        }
+        return result;
+    }
+    
+    public HashSet<String[]> getTokens(){
+        HashSet<String[]> data = new HashSet<>();
+        
+        HashSet<HashMap<Integer, Integer>> analizados = new HashSet<>();
+        for (Token token : this.counter.keySet()) {
+            HashMap<Integer, Integer> lines = getLinesByTokenValue(token.value, token.kindToken);
+            if (!analizados.contains(lines)){
+                analizados.add(lines);
+                String[] currentToken = {token.value, token.kindToken.toString(), counter.get(token).toString(), getFormattedLines(lines)};
+                data.add(currentToken);
+                //result += "\ttoken: " + token.value + "\ttipo: " + token.kindToken + "\tlinea: " + getFormattedLines(lines)+"\n";
+            }
         }
         
-        return result;
+        return data;
+        
+        
+        
+        
+        // add to frame
+        
+        // Count amount of times token appears, add to Token class?
+        // Lines in order
+        // Errors -> <String, Integer>
     }
 }
