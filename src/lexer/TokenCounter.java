@@ -150,6 +150,5 @@ public class TokenCounter {
         return data;
         
         // Token appearances in table in order <--------
-        // Extra: JFrame has a label with the name of the file
     }
 }
