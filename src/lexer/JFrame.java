@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -201,17 +200,11 @@ public class JFrame extends javax.swing.JFrame {
             Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        
-         
-        
+        }
         
         System.out.println(filename);
     }//GEN-LAST:event_jButtonActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

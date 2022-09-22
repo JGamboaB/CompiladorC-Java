@@ -1,16 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package lexer;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
-/**
- *
- * @author Sara
- */
 public class TokenCounter {
     private HashMap<Token, Integer> counter = new HashMap<>() ;
     
@@ -20,9 +15,7 @@ public class TokenCounter {
             return;
         }
         counter.put(token, 1);
-    }  
-    
-    
+    }
     
     public String getTokenValue(Token token){    
        return token.value;
@@ -47,11 +40,40 @@ public class TokenCounter {
         return result;
     }
 
+    public String sortLines(String lines){
+        String[] numbersStr = lines.split(", ");
+        int[][] numbers = new int[numbersStr.length][2]; // number, place in string (i) -> sort numbers
+        
+        for (int i = 0; i < numbersStr.length; i++){
+            if (!numbersStr[i].contains("(")){
+                numbers[i] = new int[]{Integer.parseInt(numbersStr[i]),i};
+            } else {
+                numbers[i] = new int[]{Integer.parseInt(numbersStr[i].substring(0,numbersStr[i].indexOf("("))),i};
+            } 
+        }
+  
+        List<int[]> list = Arrays.asList(numbers);
+        list.sort(new Comparator<int[]>(){
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0]-o2[0];
+            }
+        });
+        
+        String result = "";
+        
+        for (int[] value:list){
+            result += numbersStr[value[1]] + ", ";
+        }
+        
+        result = result.substring(0, result.length()-2); // Remove Last ','
+        
+        return result;
+    }
     
     public String getFormattedLines (HashMap<Integer, Integer> lines){
         String lineString = "";
         for (Integer line : lines.keySet() ){
-
             if (lines.get(line)> 1){
                 lineString += line + "(" +lines.get(line) + "), "; 
             }else{
@@ -59,6 +81,28 @@ public class TokenCounter {
             }
         }
         return lineString;
+    }
+    
+    public String[] getFormattedLines2 (HashMap<Integer, Integer> lines){
+        String[] result = new String[2];
+        int amount = 0;
+        String lineString = "";
+        for (Integer line : lines.keySet() ){
+            if (lines.get(line)> 1){
+                lineString += line + "(" +lines.get(line) + "), ";
+                amount+=lines.get(line)-1;
+            }else{
+                lineString += line + ", "; 
+            }
+            amount++;
+        }
+        lineString = lineString.substring(0, lineString.length()-2); // Remove Last ','
+        
+        // Sort Lines
+        // String test = "64(2), 1(4), 42(8), 5(2), 100, 8"
+        
+        result = new String[]{lineString, String.valueOf(amount)};
+        return result;
     }
     
     @Override 
@@ -84,21 +128,16 @@ public class TokenCounter {
             HashMap<Integer, Integer> lines = getLinesByTokenValue(token.value, token.kindToken);
             if (!analizados.contains(lines)){
                 analizados.add(lines);
-                String[] currentToken = {token.value, token.kindToken.toString(), counter.get(token).toString(), getFormattedLines(lines)};
+                String[] line_amount = getFormattedLines2(lines);
+                String[] currentToken = {token.value.replace("\\","\\\\"), token.kindToken.toString(), line_amount[1], sortLines(line_amount[0])};
                 data.add(currentToken);
-                //result += "\ttoken: " + token.value + "\ttipo: " + token.kindToken + "\tlinea: " + getFormattedLines(lines)+"\n";
             }
         }
         
         return data;
         
-        
-        
-        
-        // add to frame
-        
-        // Count amount of times token appears, add to Token class?
         // Lines in order
-        // Errors -> <String, Integer>
+        // Token appearances in table in order
+        // Escape Characters
     }
 }
