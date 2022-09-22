@@ -71,6 +71,23 @@ public class TokenCounter {
         return result;
     }
     
+    public String unEscapeString(String s){ // For Printing Escape Characters
+        StringBuilder str = new StringBuilder();
+        for (int i=0; i<s.length(); i++)
+            switch (s.charAt(i)){
+                case '\n': str.append("\\n"); break;
+                case '\t': str.append("\\t"); break;
+                case '\b': str.append("\\b"); break;
+                case '\r': str.append("\\r"); break;
+                case '\f': str.append("\\f"); break;
+                case '\'': str.append("\\'"); break;
+                case '\"': str.append("\\\""); break;
+                case '\\': str.append("\\\\"); break;
+                default: str.append(s.charAt(i));
+            }
+        return str.toString();
+    }
+    
     public String getFormattedLines (HashMap<Integer, Integer> lines){
         String lineString = "";
         for (Integer line : lines.keySet() ){
@@ -84,7 +101,6 @@ public class TokenCounter {
     }
     
     public String[] getFormattedLines2 (HashMap<Integer, Integer> lines){
-        String[] result = new String[2];
         int amount = 0;
         String lineString = "";
         for (Integer line : lines.keySet() ){
@@ -97,11 +113,8 @@ public class TokenCounter {
             amount++;
         }
         lineString = lineString.substring(0, lineString.length()-2); // Remove Last ','
-        
-        // Sort Lines
-        // String test = "64(2), 1(4), 42(8), 5(2), 100, 8"
-        
-        result = new String[]{lineString, String.valueOf(amount)};
+              
+        String[] result = new String[]{lineString, String.valueOf(amount)};
         return result;
     }
     
@@ -129,15 +142,14 @@ public class TokenCounter {
             if (!analizados.contains(lines)){
                 analizados.add(lines);
                 String[] line_amount = getFormattedLines2(lines);
-                String[] currentToken = {token.value.replace("\\","\\\\"), token.kindToken.toString(), line_amount[1], sortLines(line_amount[0])};
+                String[] currentToken = {unEscapeString(token.value), token.kindToken.toString(), line_amount[1], sortLines(line_amount[0])};
                 data.add(currentToken);
             }
         }
         
         return data;
         
-        // Lines in order
-        // Token appearances in table in order
-        // Escape Characters
+        // Token appearances in table in order <--------
+        // Extra: JFrame has a label with the name of the file
     }
 }
