@@ -43,6 +43,7 @@ public class JFrame extends javax.swing.JFrame {
             }
         };
         
+        tableMain.setAutoCreateRowSorter(true);
         tableMain.setModel(model);
         tableMain.setBackground(Color.lightGray);
     };
@@ -67,6 +68,7 @@ public class JFrame extends javax.swing.JFrame {
             }
         };
         
+        tableErrors.setAutoCreateRowSorter(true);
         tableErrors.setModel(model);
         tableErrors.setBackground(Color.lightGray);
     }
@@ -184,17 +186,34 @@ public class JFrame extends javax.swing.JFrame {
             Lexer lexer = new Lexer(reader);
             HashSet<LexicalError> errors = new HashSet<>();
             TokenCounter tokenCounter = new TokenCounter();
+            String result = "";
             
             while(true){                
                 try {
                     Token token = lexer.yylex();
                     if (token == null){
+                        System.out.println(result);
                         System.out.println(errors);
                         System.out.println(tokenCounter.toString());
                         populateMainTable(tokenCounter.getTokens());
                         return;
                     }
+                    
+                    System.out.println("Token: " + token.value + " "+token.kindToken + " "+token.line);
                     tokenCounter.countToken(token);
+                    switch (token.kindToken){
+                        case RESERVED_WORD:
+                            result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
+                        case IDENTIFIER:
+                            result += lexer.lexeme + ": IDENTIFIER\t Line: "+token.line+"\n"; break;
+                        case LITERAL:
+                            result += lexer.lexeme + ": LITERAL\t Line: "+token.line+"\n"; break;
+                        case OPERATOR:
+                            result += lexer.lexeme + ": OPERATOR\t Line: "+token.line+"\n"; break;
+                        default:
+                            result += "Token: " + token + "\n";
+                            break;
+                    }
                     
 
                 } catch(LexicalError ex) {

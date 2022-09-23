@@ -122,11 +122,12 @@ public class TokenCounter {
     public String toString(){
         String result = ">>";
         
-        HashSet<HashMap<Integer, Integer>> analizados = new HashSet<>();
+        HashSet<String> tokensIn = new HashSet<>();
         for (Token token : this.counter.keySet()) {
             HashMap<Integer, Integer> lines = getLinesByTokenValue(token.value, token.kindToken);
-            if (!analizados.contains(lines)){
-                analizados.add(lines);
+            
+            if (!tokensIn.contains(token.value)){
+                tokensIn.add(token.value);
                 result += "\ttoken: " + token.value + "\ttipo: " + token.kindToken + "\tlinea: " + getFormattedLines(lines)+"\n";
             }
         }
@@ -136,11 +137,11 @@ public class TokenCounter {
     public HashSet<String[]> getTokens(){
         HashSet<String[]> data = new HashSet<>();
         
-        HashSet<HashMap<Integer, Integer>> analizados = new HashSet<>();
+        HashSet<String> tokensIn = new HashSet<>();
         for (Token token : this.counter.keySet()) {
             HashMap<Integer, Integer> lines = getLinesByTokenValue(token.value, token.kindToken);
-            if (!analizados.contains(lines)){
-                analizados.add(lines);
+            if (!tokensIn.contains(token.value)){
+                tokensIn.add(token.value);
                 String[] line_amount = getFormattedLines2(lines);
                 String[] currentToken = {unEscapeString(token.value), token.kindToken.toString(), line_amount[1], sortLines(line_amount[0])};
                 data.add(currentToken);
@@ -150,5 +151,6 @@ public class TokenCounter {
         return data;
         
         // Token appearances in table in order <--------
+        
     }
 }

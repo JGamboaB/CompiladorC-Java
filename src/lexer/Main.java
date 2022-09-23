@@ -14,8 +14,7 @@ public class Main {
         generateLexer(source);
     }
     
-    public static void generateLexer(String source)
-    {
+    public static void generateLexer(String source){
         File file = new File(source);
         JFlex.Main.generate(file);
     }
