@@ -23,6 +23,7 @@ long 12s = "This literal has a wrong identifer name";
 char espáñol[] = "Esta tiene tilde y ñ";
 char c = 'c';
 char error_char = 'ccccc'; ///////////////////////////////////////////////////////
+#IDENTIFICADOR
 
 // LITERALS
 
@@ -43,5 +44,7 @@ Comentario de varias lineas
 */
 
 /* A SOLUCIONAR:
-#Identificador
+espáñol -> Todo malo? Porque lo divide en esp (ID) á (ERROR) ñ (ERROR) ol (ID)
+NoOct = 08 -> 0 (LITERAL) 8 (LITERAL)
+NoF = 0.123e-e2e -> 0.123e (ERROR) - (OP) e2e (ID)
 */

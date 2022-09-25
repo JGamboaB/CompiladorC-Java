@@ -47,9 +47,18 @@ OctIntegerLiteral = 0[0-7]+
 HexIntegerLiteral = 0[xX][0-9A-Fa-f]+
 FloatIntegerLiteral = [0-9]*\.[0-9]+([eE]-?[0-9]+)?
 
+CharAll = '.'
+CharN = '\\n'
+CharR = '\\r'
+CharT = '\\t'
+CharC = '\\''
+CharB = '\\\\'
+CharLiteral = {CharAll} | {CharN} | {CharR} | {CharT} | {CharC} | {CharB}
+
 Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {FloatIntegerLiteral}
 
 WrongSymbol = {Number} {Identifier}
+WrongChar = '.+'
 
 %state STRING
 
@@ -92,15 +101,17 @@ WrongSymbol = {Number} {Identifier}
 <YYINITIAL> {
   /* identifiers */ 
   {Identifier}                   { lexeme=yytext(); return createToken(KindToken.IDENTIFIER); }
-   
-  /* error fallback */
-  {WrongSymbol}                  { throw createLexicalError("Illegal character <"+yytext()+">"); }
 
   /* literals */
   {DecIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
   {OctIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
   {HexIntegerLiteral}            { lexeme=yytext(); return createToken(KindToken.LITERAL); }
   {FloatIntegerLiteral}          { lexeme=yytext(); return createToken(KindToken.LITERAL); }
+  {CharLiteral}                  { lexeme=yytext(); return createToken(KindToken.LITERAL); }
+
+  /* error fallback */
+  {WrongSymbol}                  { throw createLexicalError("Illegal character <"+yytext()+">"); }
+  {WrongChar}                    { throw createLexicalError("Character constant too long for its type <"+yytext()+">"); }
 
 
   \"                             { string.setLength(0); yybegin(STRING); }

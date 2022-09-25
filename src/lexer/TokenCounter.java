@@ -80,8 +80,6 @@ public class TokenCounter {
                 case '\b': str.append("\\b"); break;
                 case '\r': str.append("\\r"); break;
                 case '\f': str.append("\\f"); break;
-                case '\'': str.append("\\'"); break;
-                case '\"': str.append("\\\""); break;
                 case '\\': str.append("\\\\"); break;
                 default: str.append(s.charAt(i));
             }

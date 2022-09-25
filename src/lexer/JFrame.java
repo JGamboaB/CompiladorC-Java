@@ -49,7 +49,7 @@ public class JFrame extends javax.swing.JFrame {
     };
     
     public void populateErrorsTable(HashSet<LexicalError> errors){
-        String[] columns = {"Token", "Line(s)"};
+        String[] columns = {"Error", "Line(s)"};
         String[][] data = new String[errors.size()][2];
         
         Iterator<LexicalError> it = errors.iterator(); int i = 0;
@@ -110,20 +110,20 @@ public class JFrame extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Token", "Type", "Amount", "Line(s)"
             }
         ));
         jScrollPane1.setViewportView(tableMain);
 
         tableErrors.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Error", "Line(s)"
             }
         ));
         jScrollPane2.setViewportView(tableErrors);
@@ -186,36 +186,18 @@ public class JFrame extends javax.swing.JFrame {
             Lexer lexer = new Lexer(reader);
             HashSet<LexicalError> errors = new HashSet<>();
             TokenCounter tokenCounter = new TokenCounter();
-            String result = "";
             
             while(true){                
                 try {
                     Token token = lexer.yylex();
                     if (token == null){
-                        System.out.println(result);
                         System.out.println(errors);
                         System.out.println(tokenCounter.toString());
                         populateMainTable(tokenCounter.getTokens());
                         return;
                     }
-                    
-                    System.out.println("Token: " + token.value + " "+token.kindToken + " "+token.line);
                     tokenCounter.countToken(token);
-                    switch (token.kindToken){
-                        case RESERVED_WORD:
-                            result += lexer.lexeme + ": RESERVED_WORD\t Line: "+token.line+"\n"; break;
-                        case IDENTIFIER:
-                            result += lexer.lexeme + ": IDENTIFIER\t Line: "+token.line+"\n"; break;
-                        case LITERAL:
-                            result += lexer.lexeme + ": LITERAL\t Line: "+token.line+"\n"; break;
-                        case OPERATOR:
-                            result += lexer.lexeme + ": OPERATOR\t Line: "+token.line+"\n"; break;
-                        default:
-                            result += "Token: " + token + "\n";
-                            break;
-                    }
                     
-
                 } catch(LexicalError ex) {
                     errors.add(ex);        
                 }
