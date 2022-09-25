@@ -22,7 +22,7 @@ int MyVar12 = "This is a String Literal";
 long 12s = "This literal has a wrong identifer name";
 char espáñol[] = "Esta tiene tilde y ñ";
 char c = 'c';
-char error_char = 'ccccc'; ///////////////////////////////////////////////////////
+char error_char = 'ccccc'; 
 
 // LITERALS
 
@@ -40,8 +40,4 @@ NoDec = 12E
 
 /*
 Comentario de varias lineas
-*/
-
-/* A SOLUCIONAR:
-#Identificador
 */

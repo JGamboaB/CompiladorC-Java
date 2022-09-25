@@ -78,6 +78,7 @@ WrongChar = '.+'
 <YYINITIAL> "enum"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
 <YYINITIAL> "extern"         { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
 <YYINITIAL> "float"          { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
+<YYINITIAL> "for"            { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
 <YYINITIAL> "goto"           { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
 <YYINITIAL> "if"             { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
 <YYINITIAL> "int"            { lexeme=yytext(); return createToken(KindToken.RESERVED_WORD); }
