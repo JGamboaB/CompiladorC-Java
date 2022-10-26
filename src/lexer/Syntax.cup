@@ -20,64 +20,74 @@ terminal Break, Case, Char, Const, Continue, Default, Do, Else, For, If,
     Identifier, NumberLiteral, CharLiteral, String, Comma, Semicolon,
     Equal, Sum, Minus, Mult, Div, Mod, RPar, LPar, RBracket, LBracket,
     RBraces, LBraces, OpLogic, OpRelational, OpAssignment, OpIncDec, OpBool, ERROR;
-non terminal INICIO, SENTENCIA, DECLARACION, DECLARACION_FOR, IF, IF_ELSE,
-    WHILE, DO_WHILE, FOR, SENTENCIA_BOOLEANA, SENTENCIA_FOR;
 
-start with INICIO;
+non terminal program
 
-INICIO ::= 
-    Int Main Parentesis_a Parentesis_c Llave_a SENTENCIA Llave_c |
-    Main Parentesis_a Parentesis_c Llave_a SENTENCIA Llave_c
+start with program;
+
+program ::= declList;
+
+declList ::= declList decl
+    | decl
 ;
-SENTENCIA ::= 
-    SENTENCIA DECLARACION |
-    DECLARACION |
-    SENTENCIA IF | 
-    IF |
-    SENTENCIA IF_ELSE |
-    IF_ELSE |
-    SENTENCIA WHILE |
-    WHILE |
-    SENTENCIA DO_WHILE
-    DO_WHILE |
-    SENTENCIA FOR |
-    FOR
+
+decl ::= varDecl 
+    | funcDecl
 ;
-DECLARACION ::= 
-    T_dato Identificador P_coma | 
-    T_dato Identificador Op_atribucion Numero P_coma |
-    T_dato Identificador Igual Numero P_coma |
-    T_dato Identificador Op_incremento P_coma | 
-    T_dato Op_incremento Identificador P_coma | 
-    Cadena Identificador Op_atribucion Comillas Comillas P_coma |
-    Cadena Identificador Igual Comillas Comillas P_coma |
-    Cadena Identificador Op_atribucion Comillas Identificador Comillas P_coma |
-    Cadena Identificador Igual Comillas Identificador Comillas P_coma
+
+
+varDecl ::= typeVar varDeclList ;
+
+typeVar ::= Char
+    | Int
+    |Long
+    |Short
 ;
-IF ::= If Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c
+
+varDeclList ::= varDeclList Comma varDeclInit
+    | varDeclInit
 ;
-SENTENCIA_BOOLEANA ::= 
-    Op_booleano | 
-    Identificador Op_relacional Op_booleano |
-    Identificador Op_relacional Numero |
-    Identificador Op_relacional Identificador |
-    Identificador Op_relacional Comillas Comillas |
-    Identificador Op_relacional Comillas Identificador Comillas
+
+varDeclInit ::=Identifier 
+    | Identifier LBracket NumberLiteral RBracket
 ;
-IF_ELSE ::= If Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c Else Llave_a SENTENCIA Llave_c
+
+/*
+varDeclInit ::= varDeclId 
+    | varDeclId : simpleExp
 ;
-WHILE ::= While Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c
+*/
+
+funcDecl ::= typeFunc  Identifier LPar parms RPar stmt
+    | typeFunc  Identifier LPar RPar stmt
 ;
-DO_WHILE ::= Do Llave_a SENTENCIA Llave_c While Parentesis_a SENTENCIA_BOOLEANA Parentesis_c P_coma
+
+typeFunc ::= Char
+    | Int
+    |Long
+    |Short
+    |Void
 ;
-FOR ::= For Parentesis_a SENTENCIA_FOR Parentesis_c Llave_a SENTENCIA Llave_c
+
+parms ::= parmList
 ;
-SENTENCIA_FOR ::=
-    T_dato Identificador Igual Numero P_coma SENTENCIA_BOOLEANA P_coma DECLARACION_FOR |
-    Identificador Igual Numero P_coma SENTENCIA_BOOLEANA P_coma DECLARACION_FOR
+
+parmList ::= parmList Comma parmTypeList 
+    | parmTypeList
 ;
-DECLARACION_FOR ::= 
-    Identificador Op_atribucion Numero |
-    Identificador Op_incremento | 
-    Op_incremento Identificador
+parmTypeList ::= typeVar parmId;
+
+parmId ::= Identifier   
+    | Identifier LBracket RBracket
 ;
+
+
+
+
+
+
+
+
+
+
+
