@@ -21,7 +21,8 @@ terminal Break, Case, Char, Const, Continue, Default, Do, Else, For, If,
     Equal, Sum, Minus, Mult, Div, Mod, RPar, LPar, RBracket, LBracket,
     RBraces, LBraces, OpLogic, OpRelational, OpAssignment, OpIncDec, OpBool, ERROR;
 
-non terminal program
+non terminal program, declList, decl, varDecl, typeVar, varDeclList,
+    varDeclInit, funcDecl, typeFunc, parms, parmList, parmTypeList, parmId
 
 start with program;
 
