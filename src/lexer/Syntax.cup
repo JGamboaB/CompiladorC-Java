@@ -15,11 +15,11 @@ parser code
     }
 :};
 
-terminal Break, Case, Char, Const, Continue, Default, Do, Else, For, If,
-    Int, Long, Return, Short, Switch, Void, While, Main, Read, Write,
-    ID, NumberLiteral, CharLiteral, String, Comma, Semicolon,
-    Equal, Sum, Minus, Mult, Div, Mod, RPar, LPar, RBracket, LBracket,
-    RBraces, LBraces, OpLogic, Not, OpRelational, OpAssignment, OpIncDec, ERROR;
+terminal BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, ELSE, FOR, IF,
+    INT, LONG, RETURN, SHORT, SWITCH, VOID, WHILE, MAIN, READ, WRITE,
+    ID, NUMBERLITERAL, CHARLITERAL, STRING, COMMA, SEMICOLON, COLON,
+    EQUAL, SUM, MINUS, MULT, DIV, MOD, RPAR, LPAR, RBRACKET, LBRACKET,
+    RBRACES, LBRACES, OPLOGIC, NOT, OPRELATIONAL, OPASSIGNMENT, OPINCDEC, ERROR;
 
 non terminal program, declList, decl, varDecl, typeVar, varDeclList,
     varDeclInit, funcDecl, typeFunc, parms, parmList, parmTypeList, parmId
@@ -38,19 +38,19 @@ decl ::= varDecl
 
 /* EXP ---------------------------------------------------------------------- */
 
-literal ::= NumberLiteral 
-    | CharLiteral 
-    | String 
+literal ::= NUMBERLITERAL 
+    | CHARLITERAL 
+    | STRING 
     ;
 
-literalNoStr ::= NumberLiteral 
-    | CharLiteral
+literalNoStr ::= NUMBERLITERAL 
+    | CHARLITERAL
     ;
 
 idOptions ::= ID 
-    | ID LBracket NumberLiteral RBracket 
-    | ID LBracket CharLiteral RBracket 
-    | ID LBracket exp RBracket
+    | ID LBRACKET NUMBERLITERAL RBRACKET 
+    | ID LBRACKET CHARLITERAL RBRACKET 
+    | ID LBRACKET exp RBRACKET
     ;
 
 idExpLiterals ::= exp 
@@ -58,26 +58,30 @@ idExpLiterals ::= exp
     | idOptions 
     ;
 
-expAssignment ::= idOptions Equal idExpLiterals 
+expLiterals ::= exp 
+    | literal 
+    ;
+
+expAssignment ::= idOptions EQUAL idExpLiterals 
     | idOptions OpAssignment idExpLiterals
     ;
 
 expIncDec ::= idOptions OpIncDec;
 
-expRegular ::= idExpLiterals Sum idExpLiterals 
-    | idExpLiterals Minus idExpLiterals
-    | idExpLiterals Mult idExpLiterals 
-    | idExpLiterals Div idExpLiterals 
-    | idExpLiterals Mod idExpLiterals
+expRegular ::= idExpLiterals SUM idExpLiterals 
+    | idExpLiterals MINUS idExpLiterals
+    | idExpLiterals MULT idExpLiterals 
+    | idExpLiterals DIV idExpLiterals 
+    | idExpLiterals MOD idExpLiterals
     ;
 
-expRelationalLogical ::= idExpLiterals OpRelational idExpLiterals 
-    | idExpLiterals OpLogic idExpLiterals
+expRelationalLogical ::= idExpLiterals OPRELATIONAL idExpLiterals 
+    | idExpLiterals OPLOGIC idExpLiterals
     ;
 
-expNot ::= Not idExpLiterals;
+expNot ::= NOT idExpLiterals;
 
-expParenthesis ::= LPar idExpLiterals RPar;
+expParenthesis ::= LPAR idExpLiterals RPAR;
 
 exp ::= expIncDec 
     | expRegular 
@@ -86,26 +90,47 @@ exp ::= expIncDec
     | expParenthesis
     ;
 
-/* VARS ---------------------------------------------------------------------- */
-
-varDecl ::= typeVar varDeclList Semicolon;
-
-typeVar ::= Char
-    | Int
-    | Long
-    | Short
+expRegularConstant ::= expLiterals SUM expLiterals 
+    | expLiterals MINUS expLiterals
+    | expLiterals MULT expLiterals 
+    | expLiterals DIV expLiterals 
+    | expLiterals MOD expLiterals
     ;
 
-varDeclList ::= varDeclList Comma varDeclInit
+expRelationalLogicalConstant ::= expLiterals OPRELATIONAL expLiterals 
+    | expLiterals OPLOGIC expLiterals
+    ;
+
+expNotConstant ::= NOT expLiterals;
+
+expParenthesisConstant ::= LPAR expLiterals RPAR;
+
+expConstant ::= expRegularConstant 
+    | expRelationalLogicalConstant
+    | expNotConstant
+    | expParenthesisConstant
+    ;
+
+/* VARS ---------------------------------------------------------------------- */
+
+varDecl ::= typeVar varDeclList SEMICOLON;
+
+typeVar ::= CHAR
+    | INT
+    | LONG
+    | SHORT
+    ;
+
+varDeclList ::= varDeclList COMMA varDeclInit
     | varDeclInit
     ;
 
 varDeclInit ::= ID 
-    | ID Equal varAssignment
-    | ID Equal LBraces varAssignmentList RBraces                                      /*necesario? a={1,2,3}*/
-    | ID LBracket literalNoStr RBracket
-    | ID LBracket literalNoStr RBracket Equal LBraces varAssignmentList RBraces
-    | ID LBracket literalNoStr RBracket Equal LBraces RBraces                         /*necesario? a[1]={}*/
+    | ID EQUAL varAssignment
+    | ID EQUAL LBRACES varAssignmentList RBRACES                                      /*necesario? a={1,2,3}*/
+    | ID LBRACKET literalNoStr RBRACKET
+    | ID LBRACKET literalNoStr RBRACKET EQUAL LBRACES varAssignmentList RBRACES
+    | ID LBRACKET literalNoStr RBRACKET EQUAL LBRACES RBRACES                         /*necesario? a[1]={}*/
     ;
 
 varAssignment ::= literal 
@@ -114,42 +139,64 @@ varAssignment ::= literal
     | expAssingment
     ;
 
-varAssignmentList ::= varAssignmentList Comma varAssignment
+varAssignmentList ::= varAssignmentList COMMA varAssignment
     | varAssignment
     ;
 
 /* FUNCTIONS ----------------------------------------------------------------- */
 
-funcDecl ::= typeFunc ID LPar parms RPar LBraces stmt RBraces
-    | typeFunc  ID LPar RPar LBraces stmt RBraces
+funcDecl ::= typeFunc ID LPAR parms RPAR LBRACES stmt RBRACES
+    | typeFunc ID LPAR RPAR LBRACES stmt RBRACES
     ;
 
-typeFunc ::= Char
-    | Int
-    | Long
-    | Short
-    | Void
+typeFunc ::= CHAR
+    | INT
+    | LONG
+    | SHORT
+    | VOID
     ;
 
 parms ::= parmList;
 
-parmList ::= parmList Comma parmTypeList 
+parmList ::= parmList COMMA parmTypeList 
     | parmTypeList
     ;
 
 parmTypeList ::= typeVar parmId;
 
-parmId ::= ID   
-    | ID LBracket RBracket
+parmId ::= idOptions
+    | ID LBRACKET RBRACKET
     ;
 
+selectionStmt::= IF LPAR exp RPAR LBRACES stmt RBRACES
+    | IF LPAR exp RPAR LBRACES stmt RBRACES ELSE LBRACES stmt RBRACES
+    | SWITCH LPAR exp RPAR LBRACES switchStmt RBRACES
+    | SWITCH LPAR literalNoStr RPAR LBRACES switchStmt RBRACES
+    ;
 
+switchStmt ::= CASE expConstant COLON stmt
+    | CASE literal  COLON stmt
+    | DEFAULT COLON stmt
+    ;
 
+iterationStmt ::= WHILE LPAR idExpLiterals RPAR LBRACES stmt RBRACES
+    | DO LBRACES stmt RBRACES WHILE LPAR idExpLiterals RPAR SEMICOLON
+    | FOR LPAR expressionStmt expressionStmt RPAR LBRACES stmt RBRACES
+    | FOR LPAR expressionStmt expressionStmt exp RPAR LBRACES stmt RBRACES
+    | FOR LPAR expressionStmt expressionStmt expAssignment RPAR LBRACES stmt RBRACES
+    ;
 
+expressionStmt ::= SEMICOLON 
+    | exp SEMICOLON 
+    | expAssignment SEMICOLON 
+    ;
 
+stmt ::= exp SEMICOLON 
+    | expAssignment SEMICOLON 
+    | selectionStmt 
+    ;
 
-
-
-
-
+// stmt <-
+// -> read, write
+// keywords dentro de funciones
 
