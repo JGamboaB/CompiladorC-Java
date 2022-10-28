@@ -34,7 +34,7 @@ EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment = "/**" {CommentContent} "*"+ "/"
 CommentContent       = ( [^*] | \*+ [^/*] )*
 
-Identifier = [a-zA-Z_][a-zA-Z_0-9]* 
+ID = [a-zA-Z_][a-zA-Z_0-9]* 
 String = \"([^\\\"]|\\.)*\"
 
 DecIntegerLiteral = 0|[1-9][0-9]*
@@ -79,7 +79,7 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
 
 <YYINITIAL> {
   /* identifiers */ 
-  {Identifier}                   { return new Symbol(sym.Identifier, yychar, yyline, yytext()); }
+  {ID}                   { return new Symbol(sym.ID, yychar, yyline, yytext()); }
 
   /* literals */
   {Number}                       { return new Symbol(sym.NumberLiteral, yychar, yyline, yytext()); }
@@ -106,7 +106,9 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
   "}"   {return new Symbol(sym.LBraces, yychar, yyline, yytext());}
 
   /* Logic */
-  ( "&&" | "||" | "!") {return new Symbol(sym.OpLogic, yychar, yyline, yytext());}
+  ( "&&" | "||") {return new Symbol(sym.OpLogic, yychar, yyline, yytext());}
+
+  "!"  {return new Symbol(sym.Not, yychar, yyline, yytext());}
 
   /* Relational */
   ( ">" | "<" | "==" | "!=" | ">=" | "<=") {return new Symbol(sym.OpRelational, yychar, yyline, yytext());}
@@ -116,9 +118,6 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
 
   /* Increment & Decrement */
   ( "++" | "--" ) {return new Symbol(sym.OpIncDec, yychar, yyline, yytext());}
-
-  /* Bool */
-  ( true | false ) {return new Symbol(sym.OpBool, yychar, yyline, yytext());} 
 
   /* comments */
   {Comment}                      { /* ignore */ }

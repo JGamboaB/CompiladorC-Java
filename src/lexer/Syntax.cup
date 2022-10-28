@@ -17,9 +17,9 @@ parser code
 
 terminal Break, Case, Char, Const, Continue, Default, Do, Else, For, If,
     Int, Long, Return, Short, Switch, Void, While, Main, Read, Write,
-    Identifier, NumberLiteral, CharLiteral, String, Comma, Semicolon,
+    ID, NumberLiteral, CharLiteral, String, Comma, Semicolon,
     Equal, Sum, Minus, Mult, Div, Mod, RPar, LPar, RBracket, LBracket,
-    RBraces, LBraces, OpLogic, OpRelational, OpAssignment, OpIncDec, OpBool, ERROR;
+    RBraces, LBraces, OpLogic, Not, OpRelational, OpAssignment, OpIncDec, ERROR;
 
 non terminal program, declList, decl, varDecl, typeVar, varDeclList,
     varDeclInit, funcDecl, typeFunc, parms, parmList, parmTypeList, parmId
@@ -30,57 +30,118 @@ program ::= declList;
 
 declList ::= declList decl
     | decl
-;
+    ;
 
 decl ::= varDecl 
     | funcDecl
-;
+    ;
 
+/* EXP ---------------------------------------------------------------------- */
 
-varDecl ::= typeVar varDeclList ;
+literal ::= NumberLiteral 
+    | CharLiteral 
+    | String 
+    ;
+
+literalNoStr ::= NumberLiteral 
+    | CharLiteral
+    ;
+
+idOptions ::= ID 
+    | ID LBracket NumberLiteral RBracket 
+    | ID LBracket CharLiteral RBracket 
+    | ID LBracket exp RBracket
+    ;
+
+idExpLiterals ::= exp 
+    | literal 
+    | idOptions 
+    ;
+
+expAssignment ::= idOptions Equal idExpLiterals 
+    | idOptions OpAssignment idExpLiterals
+    ;
+
+expIncDec ::= idOptions OpIncDec;
+
+expRegular ::= idExpLiterals Sum idExpLiterals 
+    | idExpLiterals Minus idExpLiterals
+    | idExpLiterals Mult idExpLiterals 
+    | idExpLiterals Div idExpLiterals 
+    | idExpLiterals Mod idExpLiterals
+    ;
+
+expRelationalLogical ::= idExpLiterals OpRelational idExpLiterals 
+    | idExpLiterals OpLogic idExpLiterals
+    ;
+
+expNot ::= Not idExpLiterals;
+
+expParenthesis ::= LPar idExpLiterals RPar;
+
+exp ::= expIncDec 
+    | expRegular 
+    | expRelationalLogical 
+    | expNot 
+    | expParenthesis
+    ;
+
+/* VARS ---------------------------------------------------------------------- */
+
+varDecl ::= typeVar varDeclList Semicolon;
 
 typeVar ::= Char
     | Int
-    |Long
-    |Short
-;
+    | Long
+    | Short
+    ;
 
 varDeclList ::= varDeclList Comma varDeclInit
     | varDeclInit
-;
+    ;
 
-varDeclInit ::=Identifier 
-    | Identifier LBracket NumberLiteral RBracket
-;
+varDeclInit ::= ID 
+    | ID Equal varAssignment
+    | ID Equal LBraces varAssignmentList RBraces                                      /*necesario? a={1,2,3}*/
+    | ID LBracket literalNoStr RBracket
+    | ID LBracket literalNoStr RBracket Equal LBraces varAssignmentList RBraces
+    | ID LBracket literalNoStr RBracket Equal LBraces RBraces                         /*necesario? a[1]={}*/
+    ;
 
-/*
-varDeclInit ::= varDeclId 
-    | varDeclId : simpleExp
-;
-*/
+varAssignment ::= literal 
+    | idOptions
+    | exp
+    | expAssingment
+    ;
 
-funcDecl ::= typeFunc  Identifier LPar parms RPar stmt
-    | typeFunc  Identifier LPar RPar stmt
-;
+varAssignmentList ::= varAssignmentList Comma varAssignment
+    | varAssignment
+    ;
+
+/* FUNCTIONS ----------------------------------------------------------------- */
+
+funcDecl ::= typeFunc ID LPar parms RPar LBraces stmt RBraces
+    | typeFunc  ID LPar RPar LBraces stmt RBraces
+    ;
 
 typeFunc ::= Char
     | Int
-    |Long
-    |Short
-    |Void
-;
+    | Long
+    | Short
+    | Void
+    ;
 
-parms ::= parmList
-;
+parms ::= parmList;
 
 parmList ::= parmList Comma parmTypeList 
     | parmTypeList
-;
+    ;
+
 parmTypeList ::= typeVar parmId;
 
-parmId ::= Identifier   
-    | Identifier LBracket RBracket
-;
+parmId ::= ID   
+    | ID LBracket RBracket
+    ;
 
 
 

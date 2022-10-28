@@ -5,6 +5,9 @@
         <group>
             <file>file:/C:/Users/jgamb/Desktop/2022%20-%20II%20Semestre/Compiladores%20e%20Interpretes%20-%20Erika%20Marin%20Schuman/Proyectos/CompiladorC-Java/src/lexer/JFrame.java</file>
             <file>file:/C:/Users/jgamb/Desktop/2022%20-%20II%20Semestre/Compiladores%20e%20Interpretes%20-%20Erika%20Marin%20Schuman/Proyectos/CompiladorC-Java/src/lexer/Lexer.flex</file>
+            <file>file:/C:/Users/jgamb/Desktop/2022%20-%20II%20Semestre/Compiladores%20e%20Interpretes%20-%20Erika%20Marin%20Schuman/Proyectos/CompiladorC-Java/src/lexer/LexerCup.flex</file>
+            <file>file:/C:/Users/jgamb/Desktop/2022%20-%20II%20Semestre/Compiladores%20e%20Interpretes%20-%20Erika%20Marin%20Schuman/Proyectos/CompiladorC-Java/src/lexer/Lexer.java</file>
+            <file>file:/C:/Users/jgamb/Desktop/2022%20-%20II%20Semestre/Compiladores%20e%20Interpretes%20-%20Erika%20Marin%20Schuman/Proyectos/CompiladorC-Java/src/lexer/Syntax.cup</file>
         </group>
     </open-files>
 </project-private>
