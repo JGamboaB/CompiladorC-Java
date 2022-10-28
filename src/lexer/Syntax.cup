@@ -19,10 +19,14 @@ terminal BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, ELSE, FOR, IF,
     INT, LONG, RETURN, SHORT, SWITCH, VOID, WHILE, MAIN, READ, WRITE,
     ID, NUMBERLITERAL, CHARLITERAL, STRING, COMMA, SEMICOLON, COLON,
     EQUAL, SUM, MINUS, MULT, DIV, MOD, RPAR, LPAR, RBRACKET, LBRACKET,
-    RBRACES, LBRACES, OPLOGIC, NOT, OPRELATIONAL, OPASSIGNMENT, OPINCDEC, ERROR;
+    RBRACES, LBRACES, OPLOGIC, NOT, OPRELATIONAL, OPASSIGNMENT, OPINCDEC, error;
 
-non terminal program, declList, decl, varDecl, typeVar, varDeclList,
-    varDeclInit, funcDecl, typeFunc, parms, parmList, parmTypeList, parmId
+non terminal program, declList, decl, literal, literalNoStr, idOptions, idExpLiterals, 
+    expLiterals, expAssignment, expIncDec, expRegular, expRelationalLogical, expNot,
+    expParenthesis, exp, expRegularConstant, expRelationalLogicalConstant, expNotConstant, 
+    expParenthesisConstant, expConstant, varDecl, typeVar, varDeclList, varDeclInit, varAssignment, 
+    varAssignmentList, funcDecl, typeFunc, parms, parmList, parmTypeList, parmId,
+    selectionStmt, switchStmt, iterationStmt, expStmt, stmtList, compoundStmt, instructions, stmt
 
 start with program;
 
@@ -113,7 +117,9 @@ expConstant ::= expRegularConstant
 
 /* VARS ---------------------------------------------------------------------- */
 
-varDecl ::= typeVar varDeclList SEMICOLON;
+varDecl ::= typeVar varDeclList SEMICOLON 
+    | CONST typeVar varDeclList SEMICOLON
+    ;
 
 typeVar ::= CHAR
     | INT
@@ -147,6 +153,8 @@ varAssignmentList ::= varAssignmentList COMMA varAssignment
 
 funcDecl ::= typeFunc ID LPAR parms RPAR LBRACES stmt RBRACES
     | typeFunc ID LPAR RPAR LBRACES stmt RBRACES
+    | typeFunc MAIN LPAR parms RPAR LBRACES stmt RBRACES
+    | typeFunc MAIN LPAR RPAR LBRACES stmt RBRACES
     ;
 
 typeFunc ::= CHAR
@@ -181,22 +189,47 @@ switchStmt ::= CASE expConstant COLON stmt
 
 iterationStmt ::= WHILE LPAR idExpLiterals RPAR LBRACES stmt RBRACES
     | DO LBRACES stmt RBRACES WHILE LPAR idExpLiterals RPAR SEMICOLON
-    | FOR LPAR expressionStmt expressionStmt RPAR LBRACES stmt RBRACES
-    | FOR LPAR expressionStmt expressionStmt exp RPAR LBRACES stmt RBRACES
-    | FOR LPAR expressionStmt expressionStmt expAssignment RPAR LBRACES stmt RBRACES
+    | FOR LPAR expStmt expStmt RPAR LBRACES stmt RBRACES
+    | FOR LPAR expStmt expStmt exp RPAR LBRACES stmt RBRACES
+    | FOR LPAR expStmt expStmt expAssignment RPAR LBRACES stmt RBRACES
     ;
 
-expressionStmt ::= SEMICOLON 
+expStmt ::= SEMICOLON 
     | exp SEMICOLON 
     | expAssignment SEMICOLON 
     ;
 
-stmt ::= exp SEMICOLON 
-    | expAssignment SEMICOLON 
-    | selectionStmt 
+stmtList ::= stmt 
+    | stmtList stmt
     ;
 
-// stmt <-
-// -> read, write
-// keywords dentro de funciones
+compoundStmt ::= LBRACES RBRACES 
+    | LBRACES stmtList RBRACES 
+    | LBRACES varDecl RBRACES
+    | LBRACES varDecl stmtList RBRACES
+    ;
 
+instructions ::= READ LPAR RPAR SEMICOLON
+    | READ LPAR idOptions RPAR SEMICOLON
+    | WRITE LPAR idExpLiterals RPAR SEMICOLON
+    | WRITE LPAR expAssignment RPAR SEMICOLON
+    | RETURN SEMICOLON
+    | RETURN idExpLiterals SEMICOLON
+    | RETURN expAssignment SEMICOLON   
+    | BREAK SEMICOLON
+    | CONTINUE SEMICOLON
+    ;
+
+stmt ::= expStmt
+    | selectionStmt 
+    | iterationStmt
+    | compoundStmt
+    | instructions
+    ;
+
+/*
+Preguntas para la profe:
+error <- cuando usarlo? dentro de stmt, exp, funcion, etc...?
+prioridad de operaciones / orden <--------
+
+*/
