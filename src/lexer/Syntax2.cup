@@ -1,0 +1,306 @@
+package lexer;
+
+import java_cup.runtime.Symbol;
+
+parser code
+{:
+    private Symbol s;
+
+    public void syntax_error(Symbol s){
+        this.s = s;
+    }
+
+    public Symbol getS(){
+        return this.s;
+    }
+:};
+
+terminal DOT, BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, ELSE, FOR, IF,
+    INT, LONG, RETURN, SHORT, SWITCH, VOID, WHILE, MAIN, READ, WRITE,
+    ID, NUMBERLITERAL, CHARLITERAL, STRING, COMMA, SEMICOLON, COLON,
+    EQUAL, SUM, MINUS, MULT, DIV, MOD, RPAR, LPAR, RBRACKET, LBRACKET,
+    RBRACES, LBRACES, OR, AND, NOT, OPRELATIONAL, OPEQUALITY, OPASSIGNMENT, OPINCDEC
+;
+
+non terminal primary_expression, postfix_expression, argument_expression_list, 
+    unary_expression, unary_operator, type_specifier, specifier_qualifier_list, 
+    cast_expression, multiplicative_expression, additive_expression, relational_expression, 
+    equality_expression, logical_and_expression, logical_or_expression, assignment_expression, 
+    assignment_operator, expression, direct_abstract_declarator, parameter_declaration, 
+    parameter_list, identifier_list, declarator, initializer_list, initializer, init_declarator, 
+    init_declarator_list, declaration_specifiers, declaration,  jump_statement, iteration_statement, 
+    selection_statement, expression_statement, labeled_statement, statement, statement_list, 
+    compound_statement, function_type_specifier,  function_declaration_specifiers, declaration_list, 
+    func_declaration, declarations, program         
+;
+
+start with program;
+
+/*  EXPRESSIONS */
+
+primary_expression
+	::= ID
+	| NUMBERLITERAL
+    | CHARLITERAL
+	| STRING
+	| LPAR expression RPAR
+	;
+
+postfix_expression
+	::= primary_expression
+	| postfix_expression LBRACKET expression RBRACKET
+	| postfix_expression LPAR RPAR
+	| postfix_expression LPAR argument_expression_list RPAR
+	| postfix_expression DOT ID
+	| postfix_expression OPINCDEC
+	;
+
+argument_expression_list
+	::= assignment_expression
+	| argument_expression_list COMMA assignment_expression
+	;
+
+unary_expression
+	::= postfix_expression
+	| OPINCDEC unary_expression
+	| unary_operator cast_expression
+	;
+
+unary_operator
+	::= MULT
+	| SUM
+	| MINUS
+	| NOT
+	;
+
+type_specifier
+    ::= CHAR
+    | SHORT
+    | INT
+    | LONG
+    ;
+
+specifier_qualifier_list
+	::= type_specifier specifier_qualifier_list
+	| type_specifier
+	| CONST specifier_qualifier_list
+	| CONST
+	;
+
+cast_expression
+	::= unary_expression
+	| LPAR specifier_qualifier_list RPAR cast_expression
+	;
+
+multiplicative_expression
+	::= cast_expression
+	| multiplicative_expression MULT cast_expression
+	| multiplicative_expression DIV cast_expression
+	| multiplicative_expression MOD cast_expression
+	;
+
+additive_expression
+	::= multiplicative_expression
+	| additive_expression SUM multiplicative_expression
+	| additive_expression MINUS multiplicative_expression
+	;
+
+relational_expression
+	::= additive_expression
+	| relational_expression OPRELATIONAL additive_expression
+	;
+
+equality_expression
+	::= relational_expression
+	| equality_expression OPEQUALITY relational_expression
+	;
+
+logical_and_expression
+	::= equality_expression
+	| logical_and_expression AND equality_expression
+	;
+
+logical_or_expression
+	::= logical_and_expression
+	| logical_or_expression OR logical_and_expression
+	;
+
+assignment_expression
+	::= logical_or_expression
+	| unary_expression assignment_operator assignment_expression
+	;
+
+assignment_operator
+	::= EQUAL
+	| OPASSIGNMENT
+	;
+
+expression
+	::= assignment_expression
+	| expression COMMA assignment_expression
+	;
+
+/*  VAR DECLARATIONS    */
+
+direct_abstract_declarator
+	::= LPAR direct_abstract_declarator RPAR
+	| LBRACKET RBRACKET
+	| LBRACKET logical_or_expression RBRACKET
+	| direct_abstract_declarator LBRACKET RBRACKET
+	| direct_abstract_declarator LBRACKET logical_or_expression RBRACKET
+	| LPAR RPAR
+	| LPAR parameter_list RPAR
+	| direct_abstract_declarator LPAR RPAR
+	| direct_abstract_declarator LPAR parameter_list RPAR
+	;
+
+parameter_declaration
+	::= declaration_specifiers declarator
+	| declaration_specifiers direct_abstract_declarator
+	| declaration_specifiers
+	;
+
+parameter_list
+	::= parameter_declaration
+	| parameter_list COMMA parameter_declaration
+	;
+
+identifier_list
+	::= ID
+	| identifier_list COMMA ID
+	;
+
+declarator 
+	::= ID
+	| LPAR declarator RPAR
+	| declarator LBRACKET logical_or_expression RBRACKET
+	| declarator LBRACKET RBRACKET
+	| declarator LPAR parameter_list RPAR
+	| declarator LPAR identifier_list RPAR
+	| declarator LPAR RPAR
+	;
+
+initializer_list
+	::= initializer
+	| initializer_list COMMA initializer
+	;
+
+initializer
+	::= assignment_expression
+	| LBRACES initializer_list RBRACES
+	| LBRACES initializer_list COMMA RBRACES
+	;
+
+init_declarator
+	::= declarator
+	| declarator EQUAL initializer
+	;
+
+init_declarator_list
+	::= init_declarator
+	| init_declarator_list COMMA init_declarator
+	;
+
+declaration_specifiers
+	::= type_specifier
+	| type_specifier declaration_specifiers
+	| CONST
+	| CONST declaration_specifiers
+	;
+
+declaration
+	::= declaration_specifiers SEMICOLON
+	| declaration_specifiers init_declarator_list SEMICOLON
+	;
+
+
+/*  FUNCTION DECLARATIONS */
+
+jump_statement
+	::= CONTINUE SEMICOLON
+	| BREAK SEMICOLON
+	| RETURN SEMICOLON
+	| RETURN expression SEMICOLON
+	;
+
+iteration_statement
+	::= WHILE LPAR expression RPAR statement
+	| DO statement WHILE LPAR expression RPAR SEMICOLON
+	| FOR LPAR expression_statement expression_statement RPAR statement
+	| FOR LPAR expression_statement expression_statement expression RPAR statement
+	;
+
+selection_statement
+	::= IF LPAR expression RPAR statement
+	| IF LPAR expression RPAR statement ELSE statement
+	| SWITCH LPAR expression RPAR statement
+	;
+
+expression_statement
+	::= SEMICOLON
+	| expression SEMICOLON
+	;
+
+labeled_statement
+	::= CASE logical_or_expression COLON statement
+	| DEFAULT COLON statement
+	;
+
+statement
+	::= labeled_statement /* deberia estar dentro de un switch */
+	| compound_statement
+	| expression_statement
+	| selection_statement
+	| iteration_statement
+	| jump_statement
+	;
+
+statement_list
+	::= statement
+	| statement_list statement
+	;
+
+compound_statement
+	::= LBRACES RBRACES
+	| LBRACES statement_list RBRACES
+	| LBRACES declaration_list RBRACES
+	| LBRACES declaration_list statement_list RBRACES
+	;
+
+function_type_specifier
+    ::= CHAR
+    | SHORT
+    | INT
+    | LONG
+    | VOID
+    ;
+
+function_declaration_specifiers
+	::= function_type_specifier
+	| function_type_specifier function_declaration_specifiers
+	| CONST
+	| CONST function_declaration_specifiers
+	;
+
+declaration_list
+	::= declaration
+	| declaration_list declaration /* y las comas?? (termina en ; y eso deberia estar malo)*/
+	;
+
+func_declaration
+	::= function_declaration_specifiers declarator declaration_list compound_statement /* y los parentesis?? */
+	| function_declaration_specifiers declarator compound_statement
+	| declarator declaration_list compound_statement
+	| declarator compound_statement
+	;
+
+/*  START */
+declarations 
+    ::= declaration
+    | func_declaration
+    ;
+
+program 
+    ::= declarations
+    | program declarations
+    ;

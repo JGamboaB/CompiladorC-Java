@@ -89,6 +89,7 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
 
   /* operators */
   "//".*   {/*Ignore*/}
+  "."   {return new Symbol(sym.DOT, yychar, yyline, yytext());}  
   ","   {return new Symbol(sym.COMMA, yychar, yyline, yytext());}  
   ";"   {return new Symbol(sym.SEMICOLON, yychar, yyline, yytext());}
   ":"   {return new Symbol(sym.COLON, yychar, yyline, yytext());}
@@ -107,12 +108,13 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
   "}"   {return new Symbol(sym.RBRACES, yychar, yyline, yytext());}
 
   /* Logic */
-  ( "&&" | "||") {return new Symbol(sym.OPLOGIC, yychar, yyline, yytext());}
-
+  "||" {return new Symbol(sym.OR, yychar, yyline, yytext());}
+  "&&" {return new Symbol(sym.AND, yychar, yyline, yytext());}
   "!"  {return new Symbol(sym.NOT, yychar, yyline, yytext());}
 
   /* Relational */
-  ( ">" | "<" | "==" | "!=" | ">=" | "<=") {return new Symbol(sym.OPRELATIONAL, yychar, yyline, yytext());}
+  ( ">" | "<" | ">=" | "<=") {return new Symbol(sym.OPRELATIONAL, yychar, yyline, yytext());}
+  ( "==" | "!=" ) {return new Symbol(sym.OPEQUALITY, yychar, yyline, yytext());}
 
   /* Assignment */
   ( "+=" | "-="  | "*=" | "/=" ) {return new Symbol(sym.OPASSIGNMENT, yychar, yyline, yytext());}
