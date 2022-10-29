@@ -19,14 +19,14 @@ terminal BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, ELSE, FOR, IF,
     INT, LONG, RETURN, SHORT, SWITCH, VOID, WHILE, MAIN, READ, WRITE,
     ID, NUMBERLITERAL, CHARLITERAL, STRING, COMMA, SEMICOLON, COLON,
     EQUAL, SUM, MINUS, MULT, DIV, MOD, RPAR, LPAR, RBRACKET, LBRACKET,
-    RBRACES, LBRACES, OPLOGIC, NOT, OPRELATIONAL, OPASSIGNMENT, OPINCDEC, error;
+    RBRACES, LBRACES, OPLOGIC, NOT, OPRELATIONAL, OPASSIGNMENT, OPINCDEC;
 
 non terminal program, declList, decl, literal, literalNoStr, idOptions, idExpLiterals, 
     expLiterals, expAssignment, expIncDec, expRegular, expRelationalLogical, expNot,
     expParenthesis, exp, expRegularConstant, expRelationalLogicalConstant, expNotConstant, 
     expParenthesisConstant, expConstant, varDecl, typeVar, varDeclList, varDeclInit, varAssignment, 
     varAssignmentList, funcDecl, typeFunc, parms, parmList, parmTypeList, parmId,
-    selectionStmt, switchStmt, iterationStmt, expStmt, stmtList, compoundStmt, instructions, stmt
+    selectionStmt, switchStmt, iterationStmt, expStmt, stmtList, compoundStmt, instructions, stmt;
 
 start with program;
 
@@ -67,10 +67,10 @@ expLiterals ::= exp
     ;
 
 expAssignment ::= idOptions EQUAL idExpLiterals 
-    | idOptions OpAssignment idExpLiterals
+    | idOptions OPASSIGNMENT idExpLiterals
     ;
 
-expIncDec ::= idOptions OpIncDec;
+expIncDec ::= idOptions OPINCDEC;
 
 expRegular ::= idExpLiterals SUM idExpLiterals 
     | idExpLiterals MINUS idExpLiterals
@@ -142,7 +142,7 @@ varDeclInit ::= ID
 varAssignment ::= literal 
     | idOptions
     | exp
-    | expAssingment
+    | expAssignment
     ;
 
 varAssignmentList ::= varAssignmentList COMMA varAssignment
