@@ -41,7 +41,7 @@ start with program;
 primary_expression
 	::= ID
 	| NUMBERLITERAL
-    | CHARLITERAL
+        | CHARLITERAL
 	| STRING
 	| LPAR expression RPAR
 	;
@@ -78,6 +78,7 @@ type_specifier
     | SHORT
     | INT
     | LONG
+    | VOID
     ;
 
 specifier_qualifier_list
@@ -231,8 +232,8 @@ iteration_statement
 	;
 
 selection_statement
-	::= IF LPAR expression RPAR statement
-	| IF LPAR expression RPAR statement ELSE statement
+	::=IF LPAR expression RPAR statement ELSE statement
+        | IF LPAR expression RPAR statement
 	| SWITCH LPAR expression RPAR statement
 	;
 
@@ -288,8 +289,8 @@ declaration_list
 	;
 
 func_declaration
-	::= function_declaration_specifiers declarator declaration_list compound_statement /* y los parentesis?? */
-	| function_declaration_specifiers declarator compound_statement
+	::= declaration_specifiers declarator declaration_list compound_statement 
+	| declaration_specifiers declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
 	;
@@ -304,3 +305,16 @@ program
     ::= declarations
     | program declarations
     ;
+
+
+/*
+
+func_declaration
+	::= function_declaration_specifiers declarator declaration_list compound_statement 
+	| function_declaration_specifiers declarator compound_statement
+	| declarator declaration_list compound_statement
+	| declarator compound_statement
+	;
+
+
+*/
