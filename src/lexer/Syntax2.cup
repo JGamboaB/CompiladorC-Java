@@ -292,7 +292,7 @@ func_declaration
 	| function_declaration_specifiers declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
-        | INT MAIN LPAR RPAR compound_statement 
+        | function_declaration_specifiers MAIN LPAR RPAR compound_statement 
 	;
 
 /*  START */

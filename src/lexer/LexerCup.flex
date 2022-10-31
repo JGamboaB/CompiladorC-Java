@@ -88,7 +88,8 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
 
 
   /* operators */
-  "//".*   {/*Ignore*/}
+  "//".*        {/*Ignore*/}
+  "#include".*  {/*Ignore*/}
   "."   {return new Symbol(sym.DOT, yychar, yyline, yytext());}  
   ","   {return new Symbol(sym.COMMA, yychar, yyline, yytext());}  
   ";"   {return new Symbol(sym.SEMICOLON, yychar, yyline, yytext());}
