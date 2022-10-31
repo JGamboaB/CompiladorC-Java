@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String source = "./src/lexer/Lexer.flex";
         String lexerCup = "./src/lexer/LexerCup.flex";
-        String[] syntax = {"-expect", "1", "-parser", "Syntax", "./src/lexer/Syntax2.cup"};
+        String[] syntax = {"-expect", "81", "-parser", "Syntax", "./src/lexer/Syntax2.cup"};
         generateLexer(source, lexerCup, syntax);
     }
     

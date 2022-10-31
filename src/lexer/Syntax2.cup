@@ -74,12 +74,11 @@ unary_operator
 	;
 
 type_specifier
-    ::= CHAR
-    | SHORT
-    | INT
-    | LONG
-    | VOID
-    ;
+        ::= CHAR
+        | SHORT
+        | INT
+        | LONG
+        ;
 
 specifier_qualifier_list
 	::= type_specifier specifier_qualifier_list
@@ -289,10 +288,11 @@ declaration_list
 	;
 
 func_declaration
-	::= declaration_specifiers declarator declaration_list compound_statement 
-	| declaration_specifiers declarator compound_statement
+	::= function_declaration_specifiers declarator declaration_list compound_statement 
+	| function_declaration_specifiers declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
+        | INT MAIN LPAR RPAR compound_statement 
 	;
 
 /*  START */
