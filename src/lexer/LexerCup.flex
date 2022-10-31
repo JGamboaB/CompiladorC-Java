@@ -63,7 +63,7 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
 <YYINITIAL> "default"        { return new Symbol(sym.DEFAULT, yychar, yyline, yytext()); }
 <YYINITIAL> "do"             { return new Symbol(sym.DO, yychar, yyline, yytext()); }
 <YYINITIAL> "else"           { return new Symbol(sym.ELSE, yychar, yyline, yytext()); }
-<YYINITIAL> "for"            { return new Symbol(sym.For, yychar, yyline, yytext()); }
+<YYINITIAL> "for"            { return new Symbol(sym.FOR, yychar, yyline, yytext()); }
 <YYINITIAL> "if"             { return new Symbol(sym.IF, yychar, yyline, yytext()); }
 <YYINITIAL> "int"            { return new Symbol(sym.INT, yychar, yyline, yytext()); }
 <YYINITIAL> "long"           { return new Symbol(sym.LONG, yychar, yyline, yytext()); }

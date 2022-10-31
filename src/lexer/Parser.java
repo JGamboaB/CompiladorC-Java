@@ -11,44 +11,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java_cup.runtime.Symbol;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 
-public class JFrame extends javax.swing.JFrame {
+public class Parser extends javax.swing.JFrame {
 
     /**
      * Creates new form JFrame
      */
-    public JFrame() {
+    public Parser() {
         initComponents();
     }
     
-    public void populateMainTable(HashSet<String[]> tokens){
-        String[] columns = {"Token", "Type", "Amount", "Line(s)"};
-        String[][] data = new String[tokens.size()][4];
-        
-        Iterator<String[]> it = tokens.iterator(); int i = 0;
-        while(it.hasNext()){
-            String[] current = it.next();
-            data[i++] = current;
-        }
-        
-        DefaultTableModel model = new DefaultTableModel(data,columns){
-
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                //all cells false
-                return false;
-            }
-        };
-        
-        tableMain.setAutoCreateRowSorter(true);
-        tableMain.setModel(model);
-        tableMain.setBackground(Color.lightGray);
-    };
-    
-    public void populateErrorsTable(HashSet<LexicalError> errors){
+    public void populateLexicalErrors(HashSet<LexicalError> errors){
         String[] columns = {"Error", "Line(s)"};
         String[][] data = new String[errors.size()][2];
         
@@ -84,16 +61,16 @@ public class JFrame extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jButton = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tableMain = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         tableErrors = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        parserPanel = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("C Lexical Scanner");
+        jLabel1.setText("C Compiler");
 
         jButton.setText("Select File");
         jButton.addActionListener(new java.awt.event.ActionListener() {
@@ -101,19 +78,6 @@ public class JFrame extends javax.swing.JFrame {
                 jButtonActionPerformed(evt);
             }
         });
-
-        tableMain.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Token", "Type", "Amount", "Line(s)"
-            }
-        ));
-        jScrollPane1.setViewportView(tableMain);
 
         tableErrors.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -128,9 +92,11 @@ public class JFrame extends javax.swing.JFrame {
         ));
         jScrollPane2.setViewportView(tableErrors);
 
-        jLabel2.setText("Errors");
+        jLabel2.setText("Lexical Errors");
 
         jLabel3.setText("File:");
+
+        jScrollPane3.setViewportView(parserPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -139,14 +105,14 @@ public class JFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 738, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(173, 173, 173)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 738, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -161,8 +127,8 @@ public class JFrame extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -184,16 +150,26 @@ public class JFrame extends javax.swing.JFrame {
         try {
             Reader reader = new BufferedReader(new FileReader(filename));
             Lexer lexer = new Lexer(reader);
+            
+            Syntax syntax = new Syntax(new lexer.LexerCup(reader));
+            
             HashSet<LexicalError> errors = new HashSet<>();
             TokenCounter tokenCounter = new TokenCounter();
             
-            while(true){                
+            try {           //Parser 
+                syntax.parse();
+                parserPanel.setText(filename);
+            } catch (Exception ex) {
+                Symbol sym = syntax.getS();
+                parserPanel.setText("Syntax Error. Line: " +(sym.right + 1) + " Col: " + (sym.left + 1) + ", Text: \""+sym.value+"\"");
+            }
+            
+            while(true){     //Lexical Scanner             
                 try {
                     Token token = lexer.yylex();
                     if (token == null){
                         System.out.println(errors);
                         System.out.println(tokenCounter.toString());
-                        populateMainTable(tokenCounter.getTokens());
                         return;
                     }
                     tokenCounter.countToken(token);
@@ -201,14 +177,14 @@ public class JFrame extends javax.swing.JFrame {
                 } catch(LexicalError ex) {
                     errors.add(ex);        
                 }
-                populateErrorsTable(errors);
+                populateLexicalErrors(errors);
             }
            
             
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(JFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         System.out.println(filename);
@@ -228,20 +204,51 @@ public class JFrame extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Parser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Parser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Parser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Parser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new JFrame().setVisible(true);
+                new Parser().setVisible(true);
             }
         });
     }
@@ -251,9 +258,9 @@ public class JFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTextPane parserPanel;
     private javax.swing.JTable tableErrors;
-    private javax.swing.JTable tableMain;
     // End of variables declaration//GEN-END:variables
 }
