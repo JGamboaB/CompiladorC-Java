@@ -9,15 +9,12 @@ import java_cup.runtime.Symbol;
 %char
 
 %{
-  
-  StringBuffer string = new StringBuffer();StringBuffer string = new StringBuffer();
-
   private Symbol symbol(int type, Object value){
-    return new Symbols(type, yyline, yycolumn, value)
+    return new Symbol(type, yyline, yycolumn, value);
   }
 
   private Symbol symbol(int type){
-    return new Symbols(type, yyline, yycolumn)
+    return new Symbol(type, yyline, yycolumn);
   }
 
 %}

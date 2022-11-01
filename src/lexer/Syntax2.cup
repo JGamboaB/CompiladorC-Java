@@ -28,10 +28,9 @@ non terminal primary_expression, postfix_expression, argument_expression_list,
     equality_expression, logical_and_expression, logical_or_expression, assignment_expression, 
     assignment_operator, expression, direct_abstract_declarator, parameter_declaration, 
     parameter_list, identifier_list, declarator, initializer_list, initializer, init_declarator, 
-    init_declarator_list, declaration_specifiers, declaration,  jump_statement, iteration_statement, 
-    selection_statement, expression_statement, labeled_statement, statement, statement_list, 
-    compound_statement, function_type_specifier,  function_declaration_specifiers, declaration_list, 
-    func_declaration, declarations, program         
+    init_declarator_list, declaration_specifiers, declaration,  jump_statement, iteration_statement,
+    selection_statement, expression_statement, labeled_statement, statement, statement_list, instruction_statement,
+    compound_statement, declaration_list, func_declaration, declarations, program
 ;
 
 start with program;
@@ -231,7 +230,7 @@ iteration_statement
 	;
 
 selection_statement
-	::=IF LPAR expression RPAR statement ELSE statement
+	::= IF LPAR expression RPAR statement ELSE statement
         | IF LPAR expression RPAR statement
 	| SWITCH LPAR expression RPAR statement
 	;
@@ -246,6 +245,12 @@ labeled_statement
 	| DEFAULT COLON statement
 	;
 
+instruction_statement
+        ::= READ LPAR RPAR SEMICOLON
+        | READ LPAR ID RPAR SEMICOLON
+        | WRITE LPAR expression RPAR SEMICOLON
+        ;
+
 statement
 	::= labeled_statement /* deberia estar dentro de un switch */
 	| compound_statement
@@ -253,6 +258,7 @@ statement
 	| selection_statement
 	| iteration_statement
 	| jump_statement
+        | instruction_statement
 	;
 
 statement_list
@@ -267,32 +273,20 @@ compound_statement
 	| LBRACES declaration_list statement_list RBRACES
 	;
 
-function_type_specifier
-    ::= CHAR
-    | SHORT
-    | INT
-    | LONG
-    | VOID
-    ;
-
-function_declaration_specifiers
-	::= function_type_specifier
-	| function_type_specifier function_declaration_specifiers
-	| CONST
-	| CONST function_declaration_specifiers
-	;
-
 declaration_list
 	::= declaration
 	| declaration_list declaration /* y las comas?? (termina en ; y eso deberia estar malo)*/
 	;
 
 func_declaration
-	::= function_declaration_specifiers declarator declaration_list compound_statement 
-	| function_declaration_specifiers declarator compound_statement
+	::= declaration_specifiers declarator declaration_list compound_statement 
+        | VOID declarator declaration_list compound_statement 
+	| declaration_specifiers declarator compound_statement
+        | VOID declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
-        | function_declaration_specifiers MAIN LPAR RPAR compound_statement 
+        | declaration_specifiers MAIN LPAR RPAR compound_statement 
+        | VOID MAIN LPAR RPAR compound_statement 
 	;
 
 /*  START */

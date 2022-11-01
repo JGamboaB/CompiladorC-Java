@@ -76,6 +76,7 @@ public class ParserTest extends javax.swing.JFrame {
         
         try {
             s.parse();
+            // errorsString = '' // .append(report_error) <- report_error
             resPanel.setText("No errors\n\nINPUT:\n"+ST);
         } catch (Exception ex) {
             Symbol sym = s.getS();
