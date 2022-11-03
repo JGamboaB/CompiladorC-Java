@@ -5,6 +5,7 @@ import java_cup.runtime.Symbol;
 parser code
 {:
     private Symbol s;
+    public static int errors = 0;
 
     public void syntax_error(Symbol s){
         this.s = s;
@@ -12,6 +13,19 @@ parser code
 
     public Symbol getS(){
         return this.s;
+    }
+
+    public void report_error(String message, Object info) {
+        if (info instanceof String){
+            errors++; 
+            System.err.println("  "+ errors + "==> " + info + " "+ message + "\n\t Value: " + s.value +"\n");
+        } else {
+            StringBuffer m = new StringBuffer("Error ");
+            if (info instanceof java_cup.runtime.Symbol) 
+                m.append( "("+info.toString()+")" );     
+            m.append(" : "+message);   
+            System.err.println(m);
+        }
     }
 :};
 
@@ -210,6 +224,7 @@ declaration_specifiers
 declaration
 	::= declaration_specifiers SEMICOLON
 	| declaration_specifiers init_declarator_list SEMICOLON
+        //| error SEMICOLON {: parser.report_error("Declaration error", "Wrong"); :}
 	;
 
 
@@ -220,24 +235,35 @@ jump_statement
 	| BREAK SEMICOLON
 	| RETURN SEMICOLON
 	| RETURN expression SEMICOLON
+        | CONTINUE error SEMICOLON {: parser.report_error("Expected ';' after continue", "Wrong"); :}
+	| BREAK error SEMICOLON {: parser.report_error("Expected ';' after break", "Wrong"); :}
 	;
 
-iteration_statement
+iteration_statement // ERRORES NO DETECTADOS CON DO y FOR -> DO sin parentesis (o sin un parentesis x)
 	::= WHILE LPAR expression RPAR statement
+        | WHILE error RBRACES {: parser.report_error("'while' error", "Wrong"); :}
 	| DO statement WHILE LPAR expression RPAR SEMICOLON
+        | DO error SEMICOLON {: parser.report_error("'do' error", "Wrong"); :}
 	| FOR LPAR expression_statement expression_statement RPAR statement
 	| FOR LPAR expression_statement expression_statement expression RPAR statement
-	;
+        | FOR error RBRACES {: parser.report_error("'for' error", "Wrong"); :}
+        ;
 
 selection_statement
 	::= IF LPAR expression RPAR statement ELSE statement
         | IF LPAR expression RPAR statement
-	| SWITCH LPAR expression RPAR statement
+        | IF error RBRACES {: parser.report_error("'if' error", "Wrong"); :}
+	| SWITCH LPAR NUMBERLITERAL RPAR statement
+        | SWITCH LPAR CHARLITERAL RPAR statement
+        | SWITCH LPAR ID RPAR statement // ID[]????
+        // exp??????
+        | SWITCH error RBRACES {: parser.report_error("'switch' error", "Wrong"); :}
 	;
 
 expression_statement
 	::= SEMICOLON
 	| expression SEMICOLON
+        | error SEMICOLON {: parser.report_error("Expression error", "Wrong"); :}
 	;
 
 labeled_statement
@@ -271,7 +297,9 @@ compound_statement
 	| LBRACES statement_list RBRACES
 	| LBRACES declaration_list RBRACES
 	| LBRACES declaration_list statement_list RBRACES
-	;
+        | error RBRACES {: parser.report_error("compound_statement", "Wrong"); :}
+  
+;
 
 declaration_list
 	::= declaration
@@ -293,6 +321,7 @@ func_declaration
 declarations 
     ::= declaration
     | func_declaration
+    | error {: parser.report_error("Out of scope", "Wrong"); :}
     ;
 
 program 
@@ -307,7 +336,7 @@ func_declaration
 	::= function_declaration_specifiers declarator declaration_list compound_statement 
 	| function_declaration_specifiers declarator compound_statement
 	| declarator declaration_list compound_statement
-	| declarator compound_statement
+	| declarator compound_statement 
 	;
 
 
