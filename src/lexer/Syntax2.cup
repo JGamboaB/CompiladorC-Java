@@ -15,17 +15,11 @@ parser code
         return this.s;
     }
 
-    public void report_error(String message, Object info) {
-        if (info instanceof String){
-            errors++; 
-            System.err.println("  "+ errors + "==> " + info + " "+ message + "\n\t Value: " + s.value +"\n");
-        } else {
-            StringBuffer m = new StringBuffer("Error ");
-            if (info instanceof java_cup.runtime.Symbol) 
-                m.append( "("+info.toString()+")" );     
-            m.append(" : "+message);   
-            System.err.println(m);
-        }
+    public void report_error(String message) {
+        errors++;
+        getS();
+        System.err.println("Error (Line: " + (s.right+1) + ", Column: "+ (s.left + 1)+ ", Value: "+s.value+"): Syntax Error");
+        System.err.println("  "+ errors + " ==> "+ message + "\n");
     }
 :};
 
@@ -224,7 +218,7 @@ declaration_specifiers
 declaration
 	::= declaration_specifiers SEMICOLON
 	| declaration_specifiers init_declarator_list SEMICOLON
-        | declaration_specifiers error SEMICOLON {: parser.report_error("Declaration error", "Wrong"); :}
+        | declaration_specifiers error SEMICOLON {: parser.report_error("Declaration error"); :}
 	;
 
 
@@ -235,36 +229,36 @@ jump_statement
 	| BREAK SEMICOLON
 	| RETURN SEMICOLON
 	| RETURN expression SEMICOLON
-        | CONTINUE error SEMICOLON {: parser.report_error("Expected ';' after continue", "Wrong"); :}
-	| BREAK error SEMICOLON {: parser.report_error("Expected ';' after break", "Wrong"); :}
+        | CONTINUE error SEMICOLON {: parser.report_error("Expected ';' after continue"); :}
+	| BREAK error SEMICOLON {: parser.report_error("Expected ';' after break"); :}
 	;
 
 iteration_statement // ERRORES NO DETECTADOS CON DO y FOR -> DO sin parentesis (o sin un parentesis x)
 	::= WHILE LPAR expression RPAR compound_statement
-        | WHILE error RBRACES {: parser.report_error("'while' error", "Wrong"); :}
+        | WHILE error RBRACES {: parser.report_error("'while' error"); :}
 	| DO compound_statement WHILE LPAR expression RPAR SEMICOLON
-        | DO error SEMICOLON {: parser.report_error("'do' error", "Wrong"); :}
+        | DO error SEMICOLON {: parser.report_error("'do' error"); :}
 	| FOR LPAR expression_statement expression_statement RPAR compound_statement
 	| FOR LPAR expression_statement expression_statement expression RPAR compound_statement
         | FOR LPAR declaration expression_statement expression RPAR compound_statement // aceptar declaraciones 
-        | FOR error RBRACES {: parser.report_error("'for' error", "Wrong"); :}
+        | FOR error RBRACES {: parser.report_error("'for' error"); :}
         ;
 
 selection_statement
 	::= IF LPAR expression RPAR compound_statement ELSE compound_statement
         | IF LPAR expression RPAR compound_statement
-        | IF error RBRACES {: parser.report_error("'if' error", "Wrong"); :}
+        | IF error RBRACES {: parser.report_error("'if' error"); :}
 	| SWITCH LPAR NUMBERLITERAL RPAR compound_statement
         | SWITCH LPAR CHARLITERAL RPAR compound_statement
         | SWITCH LPAR ID RPAR statement // ID[]????
         // exp??????
-        | SWITCH error RBRACES {: parser.report_error("'switch' error", "Wrong"); :}
+        | SWITCH error RBRACES {: parser.report_error("'switch' error"); :}
 	;
 
 expression_statement
 	::= SEMICOLON
 	| expression SEMICOLON
-        | error SEMICOLON {: parser.report_error("Expression error", "Wrong"); :}
+        | error SEMICOLON {: parser.report_error("Expression error"); :}
 	;
 
 labeled_statement
@@ -299,7 +293,7 @@ compound_statement
 	| LBRACES declaration_list RBRACES
 	| LBRACES declaration_list statement_list RBRACES
 	//| LBRACES statement_list declaration_list RBRACES como la de arriba pero invirtiendo orden (en contra del enunciado?)
-        | error RBRACES {: parser.report_error("compound_statement", "Wrong"); :}
+        | error RBRACES {: parser.report_error("compound_statement"); :}
   
 ;
 
@@ -323,7 +317,7 @@ func_declaration
 declarations 
     ::= declaration
     | func_declaration
-    | error {: parser.report_error("Out of scope", "Wrong"); :}
+    | error {: parser.report_error("Out of scope"); :}
     ;
 
 program 

@@ -80,7 +80,9 @@ public class ParserTest extends javax.swing.JFrame {
             resPanel.setText("No errors\n\nINPUT:\n"+ST);
         } catch (Exception ex) {
             Symbol sym = s.getS();
-            resPanel.setText("Error. Line: " + (sym.right + 1) + " Col: " + (sym.left + 1) + ", Text: \"" + sym.value + "\"\n\nINPUT:\n"+ST);
+            System.err.println("Error (Line: " + (sym.right+1) + ", Column: "+ (sym.left + 1)+ ", Value: "+sym.value+"): Syntax Error");
+            System.err.println("  ==> Missing closing character ';' '}' ')' ']' \n");
+          
         }
         
     }//GEN-LAST:event_jButtonActionPerformed
