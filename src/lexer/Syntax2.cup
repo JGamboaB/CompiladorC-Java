@@ -216,15 +216,15 @@ init_declarator_list
 
 declaration_specifiers
 	::= type_specifier
-	| type_specifier declaration_specifiers
+	| type_specifier CONST
+	| CONST type_specifier
 	| CONST
-	| CONST declaration_specifiers
 	;
 
 declaration
 	::= declaration_specifiers SEMICOLON
 	| declaration_specifiers init_declarator_list SEMICOLON
-        //| error SEMICOLON {: parser.report_error("Declaration error", "Wrong"); :}
+        | declaration_specifiers error SEMICOLON {: parser.report_error("Declaration error", "Wrong"); :}
 	;
 
 
@@ -240,21 +240,22 @@ jump_statement
 	;
 
 iteration_statement // ERRORES NO DETECTADOS CON DO y FOR -> DO sin parentesis (o sin un parentesis x)
-	::= WHILE LPAR expression RPAR statement
+	::= WHILE LPAR expression RPAR compound_statement
         | WHILE error RBRACES {: parser.report_error("'while' error", "Wrong"); :}
-	| DO statement WHILE LPAR expression RPAR SEMICOLON
+	| DO compound_statement WHILE LPAR expression RPAR SEMICOLON
         | DO error SEMICOLON {: parser.report_error("'do' error", "Wrong"); :}
-	| FOR LPAR expression_statement expression_statement RPAR statement
-	| FOR LPAR expression_statement expression_statement expression RPAR statement
+	| FOR LPAR expression_statement expression_statement RPAR compound_statement
+	| FOR LPAR expression_statement expression_statement expression RPAR compound_statement
+        | FOR LPAR declaration expression_statement expression RPAR compound_statement // aceptar declaraciones 
         | FOR error RBRACES {: parser.report_error("'for' error", "Wrong"); :}
         ;
 
 selection_statement
-	::= IF LPAR expression RPAR statement ELSE statement
-        | IF LPAR expression RPAR statement
+	::= IF LPAR expression RPAR compound_statement ELSE compound_statement
+        | IF LPAR expression RPAR compound_statement
         | IF error RBRACES {: parser.report_error("'if' error", "Wrong"); :}
-	| SWITCH LPAR NUMBERLITERAL RPAR statement
-        | SWITCH LPAR CHARLITERAL RPAR statement
+	| SWITCH LPAR NUMBERLITERAL RPAR compound_statement
+        | SWITCH LPAR CHARLITERAL RPAR compound_statement
         | SWITCH LPAR ID RPAR statement // ID[]????
         // exp??????
         | SWITCH error RBRACES {: parser.report_error("'switch' error", "Wrong"); :}
@@ -297,6 +298,7 @@ compound_statement
 	| LBRACES statement_list RBRACES
 	| LBRACES declaration_list RBRACES
 	| LBRACES declaration_list statement_list RBRACES
+	//| LBRACES statement_list declaration_list RBRACES como la de arriba pero invirtiendo orden (en contra del enunciado?)
         | error RBRACES {: parser.report_error("compound_statement", "Wrong"); :}
   
 ;
