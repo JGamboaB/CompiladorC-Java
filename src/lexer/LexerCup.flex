@@ -70,7 +70,7 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
 <YYINITIAL> "void"           { return new Symbol(sym.VOID, yychar, yyline, yytext()); }
 <YYINITIAL> "while"          { return new Symbol(sym.WHILE, yychar, yyline, yytext()); }
 
-<YYINITIAL> "main"           { return new Symbol(sym.MAIN, yychar, yyline, yytext()); }
+// <YYINITIAL> "main"           { return new Symbol(sym.MAIN, yychar, yyline, yytext()); }
 <YYINITIAL> "read"           { return new Symbol(sym.READ, yychar, yyline, yytext()); }
 <YYINITIAL> "write"          { return new Symbol(sym.WRITE, yychar, yyline, yytext()); }
 
@@ -129,4 +129,4 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
 
 
 /* error */ 
-[^]                    { throw new Error("Illegal character <"+yytext()+">"); }
+[^]                              { /* ignore */ }

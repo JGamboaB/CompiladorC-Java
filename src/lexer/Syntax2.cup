@@ -24,7 +24,7 @@ parser code
 :};
 
 terminal DOT, BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, ELSE, FOR, IF,
-    INT, LONG, RETURN, SHORT, SWITCH, VOID, WHILE, MAIN, READ, WRITE,
+    INT, LONG, RETURN, SHORT, SWITCH, VOID, WHILE, READ, WRITE,
     ID, NUMBERLITERAL, CHARLITERAL, STRING, COMMA, SEMICOLON, COLON,
     EQUAL, SUM, MINUS, MULT, DIV, MOD, RPAR, LPAR, RBRACKET, LBRACKET,
     RBRACES, LBRACES, OR, AND, NOT, OPRELATIONAL, OPEQUALITY, OPASSIGNMENT, OPINCDEC
@@ -185,6 +185,7 @@ declarator
 	| declarator LPAR parameter_list RPAR
 	| declarator LPAR identifier_list RPAR
 	| declarator LPAR RPAR
+        | declarator LPAR error RPAR {: parser.report_error("parameter/identifier error"); :}
 	;
 
 initializer_list
@@ -233,7 +234,7 @@ jump_statement
 	| BREAK error SEMICOLON {: parser.report_error("Expected ';' after break"); :}
 	;
 
-iteration_statement // ERRORES NO DETECTADOS CON DO y FOR -> DO sin parentesis (o sin un parentesis x)
+iteration_statement 
 	::= WHILE LPAR expression RPAR compound_statement
         | WHILE error RBRACES {: parser.report_error("'while' error"); :}
 	| DO compound_statement WHILE LPAR expression RPAR SEMICOLON
@@ -262,7 +263,9 @@ expression_statement
 	;
 
 labeled_statement
-	::= CASE logical_or_expression COLON statement
+	::= CASE NUMBERLITERAL COLON statement
+        | CASE CHARLITERAL COLON statement
+        // expressions???
 	| DEFAULT COLON statement
 	;
 
@@ -309,9 +312,7 @@ func_declaration
         | VOID declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
-        | declaration_specifiers MAIN LPAR parameter_list RPAR compound_statement 
-        | VOID MAIN LPAR parameter_list RPAR compound_statement 
-        | error RPAR compound_statement {: parser.report_error("error defining function/main");:}
+        | error compound_statement {: parser.report_error("error defining function/main");:}
 	;
 
 /*  START */
