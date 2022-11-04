@@ -299,7 +299,7 @@ compound_statement
 
 declaration_list
 	::= declaration
-	| declaration_list declaration /* y las comas?? (termina en ; y eso deberia estar malo)*/
+	| declaration_list declaration 
 	;
 
 func_declaration
@@ -309,31 +309,21 @@ func_declaration
         | VOID declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
-        | declaration_specifiers MAIN LPAR RPAR compound_statement 
-        | VOID MAIN LPAR RPAR compound_statement 
+        | declaration_specifiers MAIN LPAR parameter_list RPAR compound_statement 
+        | VOID MAIN LPAR parameter_list RPAR compound_statement 
+        | error RPAR compound_statement {: parser.report_error("error defining function/main");:}
 	;
 
 /*  START */
 declarations 
     ::= declaration
     | func_declaration
-    | error {: parser.report_error("Out of scope"); :}
+    | error SEMICOLON {: parser.report_error("Out of scope"); :}
+    | error RBRACES {: parser.report_error("Out of scope"); :}
+
     ;
 
 program 
     ::= declarations
     | program declarations
     ;
-
-
-/*
-
-func_declaration
-	::= function_declaration_specifiers declarator declaration_list compound_statement 
-	| function_declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
-	| declarator compound_statement 
-	;
-
-
-*/
