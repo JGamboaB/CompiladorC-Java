@@ -29,6 +29,12 @@ parser code
         errorMSG += ("Error (Line: " + (s.right+1) + ", Column: "+ (s.left + 1)+ ", Value: "+s.value+"): Syntax Error\n");
         errorMSG += ("  "+ errors + " ==> "+ message + "\n\n");
     }
+    
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        getS();
+        errorMSG += ("Error (Line: " + (s.right) + ", Column: "+ (s.left)+ ", Value: EOF): Syntax Error\n");
+        errorMSG += " ==> Unrecoverable syntax error\n\n";  // "Missing char" ????
+    }
 :};
 
 terminal DOT, BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, ELSE, FOR, IF,
@@ -193,7 +199,7 @@ declarator
 	| declarator LPAR parameter_list RPAR
 	| declarator LPAR identifier_list RPAR
 	| declarator LPAR RPAR
-        | declarator LPAR error RPAR {: parser.report_error("parameter/identifier error"); :}
+        | declarator LPAR error RPAR {: parser.report_error("Parameter/identifier error"); :}
 	;
 
 initializer_list
@@ -244,13 +250,13 @@ jump_statement
 
 iteration_statement 
 	::= WHILE LPAR expression RPAR compound_statement
-        | WHILE error RBRACES {: parser.report_error("'while' error"); :}
-	| DO compound_statement WHILE LPAR expression RPAR SEMICOLON
-        | DO error SEMICOLON {: parser.report_error("'do' error"); :}
+        | WHILE error compound_statement {: parser.report_error("'while' error"); :}
+	| DO compound_statement WHILE LPAR expression RPAR SEMICOLON    // NO SE OCUPA
+        | DO error SEMICOLON {: parser.report_error("'do' error"); :}   // NO SE OCUPA
 	| FOR LPAR expression_statement expression_statement RPAR compound_statement
 	| FOR LPAR expression_statement expression_statement expression RPAR compound_statement
         | FOR LPAR declaration expression_statement expression RPAR compound_statement // aceptar declaraciones 
-        | FOR error RBRACES {: parser.report_error("'for' error"); :}
+        | FOR error compound_statement {: parser.report_error("'for' error"); :}
         ;
 
 selection_statement
@@ -259,8 +265,7 @@ selection_statement
         | IF error RBRACES {: parser.report_error("'if' error"); :}
 	| SWITCH LPAR NUMBERLITERAL RPAR compound_statement
         | SWITCH LPAR CHARLITERAL RPAR compound_statement
-        | SWITCH LPAR ID RPAR statement // ID[]????
-        // exp??????
+        | SWITCH LPAR ID RPAR statement // ID[]???? // exp??????
         | SWITCH error RBRACES {: parser.report_error("'switch' error"); :}
 	;
 
@@ -272,8 +277,7 @@ expression_statement
 
 labeled_statement
 	::= CASE NUMBERLITERAL COLON statement
-        | CASE CHARLITERAL COLON statement
-        // expressions???
+        | CASE CHARLITERAL COLON statement // expressions???
 	| DEFAULT COLON statement
 	;
 
@@ -303,10 +307,9 @@ compound_statement
 	| LBRACES statement_list RBRACES
 	| LBRACES declaration_list RBRACES
 	| LBRACES declaration_list statement_list RBRACES
-	//| LBRACES statement_list declaration_list RBRACES como la de arriba pero invirtiendo orden (en contra del enunciado?)
-        | error RBRACES {: parser.report_error("compound_statement"); :}
-  
-;
+	//| LBRACES statement_list declaration_list RBRACES // como la de arriba pero invirtiendo orden (en contra del enunciado?)
+        | error RBRACES {: parser.report_error("Statement"); :}
+        ;
 
 declaration_list
 	::= declaration
@@ -320,7 +323,7 @@ func_declaration
         | VOID declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
-        | error compound_statement {: parser.report_error("error defining function/main");:}
+        | error compound_statement {: parser.report_error("Defining function/main error");:}
 	;
 
 /*  START */
