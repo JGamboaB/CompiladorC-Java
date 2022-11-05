@@ -6,6 +6,7 @@ parser code
 {:
     private Symbol s;
     public static int errors = 0;
+    public String errorMSG = "";
 
     public void syntax_error(Symbol s){
         this.s = s;
@@ -15,11 +16,18 @@ parser code
         return this.s;
     }
 
+    public String getErrors(){
+        errors = 0;
+        return errorMSG;
+    }
+
     public void report_error(String message) {
         errors++;
         getS();
-        System.err.println("Error (Line: " + (s.right+1) + ", Column: "+ (s.left + 1)+ ", Value: "+s.value+"): Syntax Error");
-        System.err.println("  "+ errors + " ==> "+ message + "\n");
+        System.out.println("Error (Line: " + (s.right+1) + ", Column: "+ (s.left + 1)+ ", Value: "+s.value+"): Syntax Error\n");
+        System.out.println("  "+ errors + " ==> "+ message + "\n");
+        errorMSG += ("Error (Line: " + (s.right+1) + ", Column: "+ (s.left + 1)+ ", Value: "+s.value+"): Syntax Error\n");
+        errorMSG += ("  "+ errors + " ==> "+ message + "\n\n");
     }
 :};
 
@@ -321,7 +329,6 @@ declarations
     | func_declaration
     | error SEMICOLON {: parser.report_error("Out of scope"); :}
     | error RBRACES {: parser.report_error("Out of scope"); :}
-
     ;
 
 program 

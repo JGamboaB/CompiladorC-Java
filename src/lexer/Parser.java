@@ -22,7 +22,10 @@ public class Parser extends javax.swing.JFrame {
      * Creates new form JFrame
      */
     public Parser() {
-        initComponents();
+        initComponents(); //rgb(31,32,35)
+        parserPanel.setBackground(new Color(105,120,165) );
+        tableErrors.setBackground(new Color(105,120,165) );
+        
     }
     
     public void populateLexicalErrors(HashSet<LexicalError> errors){
@@ -47,7 +50,7 @@ public class Parser extends javax.swing.JFrame {
         
         tableErrors.setAutoCreateRowSorter(true);
         tableErrors.setModel(model);
-        tableErrors.setBackground(Color.lightGray);
+        tableErrors.setBackground(new Color(105,120,165));
     }
 
     /**
@@ -149,20 +152,22 @@ public class Parser extends javax.swing.JFrame {
         
         try {
             Reader reader = new BufferedReader(new FileReader(filename));
-            Lexer lexer = new Lexer(reader);
-            
             Syntax syntax = new Syntax(new lexer.LexerCup(reader));
-            
-            HashSet<LexicalError> errors = new HashSet<>();
-            TokenCounter tokenCounter = new TokenCounter();
             
             try {           //Parser 
                 syntax.parse();
-                parserPanel.setText(filename);
+                String txt = syntax.getErrors();
+                parserPanel.setText(txt);
             } catch (Exception ex) {
                 Symbol sym = syntax.getS();
-                parserPanel.setText("Syntax Error. Line: " +(sym.right + 1) + " Col: " + (sym.left + 1) + ", Text: \""+sym.value+"\"");
+                parserPanel.setText("Error (Line: " + (sym.right+1) + ", Column: "+ (sym.left + 1)+ ", Value: "+sym.value+"): Syntax Error\n" +
+                    "  ==> Missing closing character ';' '}' ')' ']' \n");
             }
+            
+            reader = new BufferedReader(new FileReader(filename));
+            Lexer lexer = new Lexer(reader);
+            HashSet<LexicalError> errors = new HashSet<>();
+            TokenCounter tokenCounter = new TokenCounter();
             
             while(true){     //Lexical Scanner             
                 try {
