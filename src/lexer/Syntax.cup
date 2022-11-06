@@ -261,11 +261,11 @@ iteration_statement
 selection_statement
 	::= IF LPAR expression RPAR compound_statement ELSE compound_statement
         | IF LPAR expression RPAR compound_statement
-        | IF error RBRACES {: parser.report_error("'if' error"); :}
+        | IF error compound_statement {: parser.report_error("'if' error"); :}
 	| SWITCH LPAR NUMBERLITERAL RPAR compound_statement
         | SWITCH LPAR CHARLITERAL RPAR compound_statement
         | SWITCH LPAR ID RPAR statement // ID[]???? // exp??????
-        | SWITCH error RBRACES {: parser.report_error("'switch' error"); :}
+        | SWITCH error compound_statement {: parser.report_error("'switch' error"); :}
 	;
 
 expression_statement

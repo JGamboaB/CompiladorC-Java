@@ -24,8 +24,9 @@ public class Parser extends javax.swing.JFrame {
     public Parser() {
         initComponents(); //rgb(31,32,35)
         parserPanel.setBackground(new Color(105,120,165) );
+        parserPanel.setForeground(Color.WHITE);
         tableErrors.setBackground(new Color(105,120,165) );
-        
+        tableErrors.setForeground(Color.WHITE);
     }
     
     public void populateLexicalErrors(HashSet<LexicalError> errors){
