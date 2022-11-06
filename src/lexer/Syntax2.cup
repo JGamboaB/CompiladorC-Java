@@ -23,7 +23,6 @@ parser code
 
     public void report_error(String message) {
         errors++;
-        getS();
         System.out.println("Error (Line: " + (s.right+1) + ", Column: "+ (s.left + 1)+ ", Value: "+s.value+"): Syntax Error\n");
         System.out.println("  "+ errors + " ==> "+ message + "\n");
         errorMSG += ("Error (Line: " + (s.right+1) + ", Column: "+ (s.left + 1)+ ", Value: "+s.value+"): Syntax Error\n");
@@ -33,7 +32,7 @@ parser code
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
         getS();
         errorMSG += ("Error (Line: " + (s.right) + ", Column: "+ (s.left)+ ", Value: EOF): Syntax Error\n");
-        errorMSG += " ==> Unrecoverable syntax error\n\n";  // "Missing char" ????
+        errorMSG += " ==> Unrecoverable syntax error\n\n";
     }
 :};
 
