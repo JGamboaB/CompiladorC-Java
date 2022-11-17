@@ -82,7 +82,7 @@ Number = {DecIntegerLiteral} | {OctIntegerLiteral} | {HexIntegerLiteral} | {Floa
   /* literals */
   {Number}                       { return new Symbol(sym.NUMBERLITERAL, yycolumn, yyline, yytext()); }
   {CharLiteral}                  { return new Symbol(sym.CHARLITERAL, yycolumn, yyline, yytext()); }
-  {String}                       { return symbol(sym.STRING, new String(yytext())); }
+  {String}                       { return new Symbol(sym.STRING, yycolumn, yyline, yytext()); }
 
 
   /* operators */
