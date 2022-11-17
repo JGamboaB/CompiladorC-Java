@@ -55,7 +55,89 @@ public class Semantic {
         }
     }
     
+   
     
+    //Tabla de simbolos ST
+    
+    public static class STNode{
+        private String symbolName;
+        private String type;
+        private String returnType;
+        private String scope;
+        private String line;
+
+        public STNode(String symbolName, String type, String returnType, String scope, String line) {
+            this.symbolName = symbolName;
+            this.type = type;
+            this.returnType = returnType;
+            this.scope = scope;
+            this.line = line;
+        }
+        
+        
+        
+        public STNode(String symbolName, String type, String scope, String line) {
+            this.symbolName = symbolName;
+            this.type = type;
+            this.returnType = null;
+            this.scope = scope;
+            this.line = line;
+        }        
+        
+        public void print() {
+        
+            System.out.print("\nname: " + this.symbolName + "\t");
+            System.out.print("type: " + this.type + "\t");
+            System.out.print("return type: " + this.returnType + "\t");
+            System.out.print("scope: " + this.scope + "\t");
+            System.out.print("line: " + this.line);
+            
+        }
+        
+        public String getSymbolName() {
+            return symbolName;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getReturnType() {
+            return returnType;
+        }
+        
+        public String getScope() {
+            return scope;
+        }
+
+        public String getLine() {
+            return line;
+        }
+
+        public void setSymbolName(String symbolName) {
+            this.symbolName = symbolName;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public void setReturnType(String returnType) {
+            this.returnType = returnType;
+        }
+
+        public void setScope(String scope) {
+            this.scope = scope;
+        }
+
+        public void setLine(String line) {
+            this.line = line;
+        }
+        
+    }
+    
+    public static ArrayList<STNode> ST = new ArrayList();
+
     public static void main(String args[]) {
         int a, b;
         RS_Type var1 = new RS_Type();
@@ -64,14 +146,14 @@ public class Semantic {
         var2.value = "a";
         RS_ID var3 = new RS_ID();
         var3.value = "b";
-        
+
         RS_Type var11 = new RS_Type();
         var11.value = "char";
         RS_ID var21 = new RS_ID();
         var21.value = "a";
         RS_ID var31 = new RS_ID();
         var31.value = "b";
-    
+
         Queue q = new Queue();
         q.add(var1);
         q.add(var2);
@@ -79,15 +161,31 @@ public class Semantic {
         q.add(var11);
         q.add(var21);
         q.add(var31);
-        
+
         System.out.println(q.getLastRS_Type().value);
         q.printQueue();
+        
+        
+        ST.add(new STNode("maain","function","int","global","21"));
+        ST.add(new STNode("x","integer","local","1"));
+        ST.add(new STNode("z","char","for loop","64"));
+        for (STNode node : ST){
+            node.print();
+        }
+        
+        
+        
+        /*
+            TO-DO
+                1. Acciones semanticas
+                2. Sintaxis
+                3. Interfaz
+                4. Generar ASM :c
+                5. Documentacion :cc
+        */
+
+      
+        
     }
     
-    
-    
-    
-    //Method find by specific RS ???
-    
-    //Tabla de simbolos TS
 }
