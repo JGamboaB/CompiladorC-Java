@@ -1,6 +1,7 @@
 package lexer;
 
 import java_cup.runtime.Symbol;
+import lexer.Semantic;
 
 parser code
 {:
