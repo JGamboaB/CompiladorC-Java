@@ -192,7 +192,7 @@ identifier_list
 	;
 
 declarator 
-	::= ID
+	::= ID {: rememberID(s); :}
 	| LPAR declarator RPAR
 	| declarator LBRACKET logical_or_expression RBRACKET
 	| declarator LBRACKET RBRACKET
@@ -224,15 +224,15 @@ init_declarator_list
 	;
 
 declaration_specifiers
-	::= type_specifier
-	| type_specifier CONST
-	| CONST type_specifier
+	::= type_specifier {: rememberType(s); :}
+	| type_specifier {: rememberType(s); :} CONST
+	| CONST type_specifier {: rememberType(s); :}
 	| CONST
 	;
 
 declaration
 	::= declaration_specifiers SEMICOLON
-	| declaration_specifiers init_declarator_list SEMICOLON
+	| declaration_specifiers init_declarator_list SEMICOLON {: declInsertTS(s); :}
         | declaration_specifiers error SEMICOLON {: parser.report_error("Declaration error"); :}
 	;
 
