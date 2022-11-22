@@ -3,6 +3,12 @@ package lexer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java_cup.runtime.Symbol;
+import lexer.SemanticRegisters.RegisterCompoundStatement;
+import lexer.SemanticRegisters.RegisterDo;
+import lexer.SemanticRegisters.RegisterId;
+import lexer.SemanticRegisters.RegisterIf;
+import lexer.SemanticRegisters.RegisterWhile;
+import lexer.SemanticRegisters.iRegister;
 
 public class Semantic {
     /*Register -> Tipo, id, operador, DO (constante/direccion), if, while
@@ -15,6 +21,38 @@ public class Semantic {
     while -> exit_label, while_label
    
     */
+    private SemanticStack semanticStack = new SemanticStack();
+    private String generatedCode = "";
+    private int sequenceNumber = 0;
+
+    public SemanticStack getSemanticStack() {
+        return semanticStack;
+    }
+
+    public void setSemanticStack(SemanticStack semanticStack) {
+        this.semanticStack = semanticStack;
+    }
+
+    public static void setSQueue(Queue SQueue) {
+        Semantic.SQueue = SQueue;
+    }
+
+    public int getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public void setSequenceNumber(int sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+    
+    public String getGeneratedCode() {
+        return generatedCode;
+    }
+
+    public void setGeneratedCode(String generatedCode) {
+        this.generatedCode = generatedCode;
+    }
+    
     
     public static class RS{
         String label; // RS_Type, RS_ID, RS_OP, RS_IF, RS_WHILE
@@ -227,9 +265,97 @@ public class Semantic {
     
     
     
-    // if/else
+    // Acciones Semanticas para IF
     
-    // while
+        /*
+            IF #startIf LPAR expression RPAR #testIf compound_statement ELSE #startElse statement #endIf
+            IF #startIf LPAR expression RPAR #testIf compound_statement #endif 
+        */
+    
+    public void startIf(){
+        RegisterIf registerIf = new RegisterIf();// crear RS_IF
+        
+        registerIf.setLabelElse(getNextLabel("ELSE_LABEL")); // asignar 2 nombres de labels
+        registerIf.setLabelExit(getNextLabel("EXIT_LABEL"));
+        
+        semanticStack.push(registerIf); //Push RS_IF
+    }
+    
+    public void testIf(){
+        RegisterDo registerDo = semanticStack.popRegisterDo();   
+        // ToDo: generar el codigo de la evaluacion segun la direccion de registerDo
+        generatedCode += "JZ " +semanticStack.peekRegisterIf().getLabelElse() + "\n"; // generar jump condicional con RS_IF.else_label
+    }
+    
+    public void startElse(){
+        generatedCode += "JUMP " + semanticStack.peekRegisterIf().getLabelExit() + "\n";
+        generatedCode += semanticStack.peekRegisterIf().getLabelElse() + ":\n"; 
+    }
+    
+    public void endIf(){
+        generatedCode += semanticStack.peekRegisterIf().getLabelExit() + ":\n";
+        semanticStack.popRegisterIf();
+    }
+    
+    // Acciones Semanticas para WHILE
+    
+        /*
+            WHILE #startWhile LPAR expression RPAR #testWhile compound_statement #endWhile
+        */
+    
+    public void startWhile(){
+        RegisterWhile registerWhile = new RegisterWhile(); // crear RS_WHILE
+        
+        registerWhile.setLabelWhile(getNextLabel("WHILE_LABEL")); // ASIGNAR 2 LABELS
+        registerWhile.setLabelExit(getNextLabel("EXIT_LABEL"));
+        
+        generatedCode += registerWhile.getLabelWhile() + ":\n"; // general RS_WHILE.while_label + ":"
+        
+        semanticStack.push(registerWhile); // push RS_WHILE
+        
+    }
+    
+    public void testWhile(){
+        RegisterDo registerDo = semanticStack.popRegisterDo();
+        // generar el codigo de la evaluacion segun la direccion de registerDo
+        generatedCode += "JZ " + semanticStack.peekRegisterWhile().getLabelExit()+"/n"; // generar jump condicional con RS_WHILE.exit_label
+    }
+    
+    public void endWhile(){
+        generatedCode += "JUMP" + semanticStack.peekRegisterWhile().getLabelWhile() + "\n";  // JUMP WHILE_LABEL1
+        generatedCode += semanticStack.peekRegisterWhile().getLabelExit() + ":\n"; // EXIT_LABEL:
+        semanticStack.popRegisterWhile();
+    }    
+    
+    // Acciones Semanticas para COMPOUND STATEMENT (bloque)
+        /*
+            #startCompountStatement LBRACES RBRACES #endCompountStatement
+            #startCompountStatement LBRACES statement_list RBRACES #endCompountStatement
+            #startCompountStatement LBRACES declaration_list RBRACES #endCompountStatement
+            #startCompountStatement LBRACES declaration_list statement_list RBRACES #endCompountStatement
+    
+            - Maneja el SCOPE
+            - aplica en IF, WHILE, ...
+        */
+    
+    public void startCompoundStatement(){
+        semanticStack.push(new RegisterCompoundStatement()); // meter un registo de compound statement
+    }
+    
+    public void endCompoundStatement(){
+        RegisterId registerId;
+        do {
+            registerId = semanticStack.popRegisterVarUntilRegisterCompoundStatement();
+        } while (registerId != null);
+        
+        semanticStack.popRegisterCompoundStatement();
+    }
+    
+    // auxiliary functions
+    
+    public String getNextLabel(String labelName) {
+        return labelName + sequenceNumber++;
+    }
     
     //Function <---
     
