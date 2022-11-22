@@ -9,7 +9,17 @@ package lexer.SemanticRegisters;
  * @author Sara
  */
 public class RegisterId implements iRegister{
+    
+    private String name;
 
+    public String getName() {
+        return name;
+    }
+
+    public RegisterId(String name) {
+        this.name = name;
+    }
+    
     @Override
     public RegisterIf getAsRegisterIf() {
         return null;
@@ -37,6 +47,11 @@ public class RegisterId implements iRegister{
 
     @Override
     public RegisterType getAsRegisterType() {
+        return null;
+    }
+
+    @Override
+    public RegisterVar getAsRegisterVar() {
         return null;
     }
     

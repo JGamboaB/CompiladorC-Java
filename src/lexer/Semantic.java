@@ -7,6 +7,8 @@ import lexer.SemanticRegisters.RegisterCompoundStatement;
 import lexer.SemanticRegisters.RegisterDo;
 import lexer.SemanticRegisters.RegisterId;
 import lexer.SemanticRegisters.RegisterIf;
+import lexer.SemanticRegisters.RegisterType;
+import lexer.SemanticRegisters.RegisterVar;
 import lexer.SemanticRegisters.RegisterWhile;
 import lexer.SemanticRegisters.iRegister;
 
@@ -172,14 +174,19 @@ public class Semantic {
     // ====> Acciones Semanticas
     // Traduccion de Declaraciones
     public void rememberType(Symbol s){
-        SQueue.add(new RS("RS_Type", (String) s.value));
+        // SQueue.add(new RS("RS_Type", (String) s.value));
+        RegisterType registerType =new RegisterType(s.value.toString());
+        semanticStack.push(registerType);
     }
     
     public void rememberID(Symbol s){
-        SQueue.add(new RS("RS_ID", (String) s.value));
+      //  SQueue.add(new RS("RS_ID", (String) s.value));
+      RegisterId registerId = new RegisterId(s.value.toString());
+      semanticStack.push(registerId);
     }
     
     public void declInsertTS(Symbol s){
+    /*
         RS type = SQueue.getLastRS_Type();
         RS top = SQueue.get(-1);
         while (top != type){
@@ -191,6 +198,19 @@ public class Semantic {
                 ST.add(new STNode(top.value, "ERROR", "scope", String.valueOf(s.right+1))); 
             } top = SQueue.get(-1);   
         } SQueue.remove(-1); //POP RS_Type
+    */
+        RegisterType registerType = semanticStack.peekRegisterType();
+        RegisterId registerId;
+        do {
+            registerId = semanticStack.popRegisterIdUntilRegisterType();
+            if(registerId != null){
+                ST.add(new STNode(registerId.getName(), registerType.getType(), "scope", String.valueOf(s.right+1)));
+                semanticStack.push(new RegisterVar(registerId.getName()));
+            }
+        } while (registerId != null);
+
+        semanticStack.popRegisterType();
+        
     }
     
     // Caso int a = 3+3/3; ??? -> | declarator EQUAL initializer (218)
@@ -198,7 +218,8 @@ public class Semantic {
 
     // Traduccion de expresiones --> Strings ignorados
     public void rememberConst(Symbol s){
-        SQueue.add(new RS("RS_DO", (String) s.value, "Constant"));
+        // SQueue.add(new RS("RS_DO", (String) s.value, "Constant"));
+        semanticStack.push( new RegisterDo());
     }
     
     public void rememberOP(Symbol s){
@@ -343,10 +364,10 @@ public class Semantic {
     }
     
     public void endCompoundStatement(){
-        RegisterId registerId;
+        RegisterVar registerVar;
         do {
-            registerId = semanticStack.popRegisterVarUntilRegisterCompoundStatement();
-        } while (registerId != null);
+            registerVar = semanticStack.popRegisterVarUntilRegisterCompoundStatement();
+        } while (registerVar != null);
         
         semanticStack.popRegisterCompoundStatement();
     }

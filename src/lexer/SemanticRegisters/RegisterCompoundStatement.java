@@ -39,5 +39,10 @@ public class RegisterCompoundStatement implements iRegister {
     public RegisterType getAsRegisterType() {
         return null;
     }
+
+    @Override
+    public RegisterVar getAsRegisterVar() {
+        return null;
+    }
     
 }

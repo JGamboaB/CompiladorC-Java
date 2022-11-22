@@ -10,6 +10,7 @@ import lexer.SemanticRegisters.RegisterDo;
 import lexer.SemanticRegisters.RegisterId;
 import lexer.SemanticRegisters.RegisterIf;
 import lexer.SemanticRegisters.RegisterType;
+import lexer.SemanticRegisters.RegisterVar;
 import lexer.SemanticRegisters.RegisterWhile;
 import lexer.SemanticRegisters.iRegister;
 
@@ -160,12 +161,30 @@ public class SemanticStack {
         return null;
     }   
     
-    public RegisterId popRegisterVarUntilRegisterCompoundStatement(){
+    public RegisterVar popRegisterVarUntilRegisterCompoundStatement(){
         for(int i = registers.size()-1; i>=0; i--){
             iRegister register = registers.get(i);
             
             RegisterCompoundStatement registerCompoundStatement = register.getAsRegisterCompoundStatement();
             if(registerCompoundStatement != null){
+                return null;
+            }
+            
+            RegisterVar registerVar = register.getAsRegisterVar();
+            if(registerVar != null){
+                registers.remove(i);
+                return registerVar;
+            }
+        }
+        return null;
+    }
+    
+    public RegisterId popRegisterIdUntilRegisterType(){
+        for(int i = registers.size()-1; i>=0; i--){
+            iRegister register = registers.get(i);
+            
+            RegisterType registerType = register.getAsRegisterType();
+            if(registerType != null){
                 return null;
             }
             

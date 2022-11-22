@@ -57,5 +57,10 @@ public class RegisterWhile implements iRegister {
     public RegisterType getAsRegisterType() {
         return null;
     }
+
+    @Override
+    public RegisterVar getAsRegisterVar() {
+        return null;
+    }
     
 }

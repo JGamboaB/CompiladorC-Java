@@ -8,7 +8,16 @@ package lexer.SemanticRegisters;
  *
  * @author Sara
  */
-public class RegisterDo implements iRegister{
+public class RegisterVar implements iRegister{
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public RegisterVar(String name) {
+        this.name = name;
+    }
 
     @Override
     public RegisterIf getAsRegisterIf() {
@@ -22,7 +31,7 @@ public class RegisterDo implements iRegister{
 
     @Override
     public RegisterDo getAsRegisterDo() {
-        return this;
+        return null;
     }
 
     @Override
@@ -42,7 +51,7 @@ public class RegisterDo implements iRegister{
 
     @Override
     public RegisterVar getAsRegisterVar() {
-        return null;
+        return this;
     }
     
 }

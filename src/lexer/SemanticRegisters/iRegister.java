@@ -15,5 +15,5 @@ public interface iRegister {
     RegisterCompoundStatement getAsRegisterCompoundStatement();
     RegisterId getAsRegisterId();
     RegisterType getAsRegisterType();
-    
+    RegisterVar getAsRegisterVar();
 }
