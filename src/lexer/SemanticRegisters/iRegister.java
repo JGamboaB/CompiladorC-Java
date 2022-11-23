@@ -16,4 +16,5 @@ public interface iRegister {
     RegisterId getAsRegisterId();
     RegisterType getAsRegisterType();
     RegisterVar getAsRegisterVar();
+    RegisterOperator getAsRegisterOperator();
 }

@@ -3,10 +3,12 @@ package lexer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java_cup.runtime.Symbol;
+import lexer.SemanticRegisters.KindDo;
 import lexer.SemanticRegisters.RegisterCompoundStatement;
 import lexer.SemanticRegisters.RegisterDo;
 import lexer.SemanticRegisters.RegisterId;
 import lexer.SemanticRegisters.RegisterIf;
+import lexer.SemanticRegisters.RegisterOperator;
 import lexer.SemanticRegisters.RegisterType;
 import lexer.SemanticRegisters.RegisterVar;
 import lexer.SemanticRegisters.RegisterWhile;
@@ -114,41 +116,36 @@ public class Semantic {
         private String symbolName;
         private String type;
         private String returnType;
-        private String scope;
         private String line;
 
-        public STNode(String symbolName, String type, String returnType, String scope, String line) {
+        public STNode(String symbolName, String type, String returnType, String line) {
             this.symbolName = symbolName;
             this.type = type;
             this.returnType = returnType;
-            this.scope = scope;
             this.line = line;
         }
         
-        public STNode(String symbolName, String type, String scope, String line) {
+        public STNode(String symbolName, String type, String line) {
             this.symbolName = symbolName;
             this.type = type;
             this.returnType = null;
-            this.scope = scope;
             this.line = line;
         }        
         
         public void print() {
             System.out.print("\nname: " + this.symbolName + "\t" +
                 "type: " + this.type + "\t" + "return-type: " + this.returnType + "\t" +
-                "scope: " + this.scope + "\t" + "line: " + this.line);
+                "scope: " + "\t" + "line: " + this.line);
         }
         
         public String getSymbolName() { return symbolName; }
         public String getType() { return type; }
         public String getReturnType() { return returnType; }
-        public String getScope() { return scope; }
         public String getLine() { return line; }
         
         public void setSymbolName(String symbolName) { this.symbolName = symbolName; }
         public void setType(String type) { this.type = type; }
         public void setReturnType(String returnType) { this.returnType = returnType; }
-        public void setScope(String scope) { this.scope = scope; }
         public void setLine(String line) { this.line = line; }
         
     }
@@ -172,6 +169,7 @@ public class Semantic {
     */
     
     // ====> Acciones Semanticas
+    
     // Traduccion de Declaraciones
     public void rememberType(Symbol s){
         // SQueue.add(new RS("RS_Type", (String) s.value));
@@ -199,6 +197,8 @@ public class Semantic {
             } top = SQueue.get(-1);   
         } SQueue.remove(-1); //POP RS_Type
     */
+    // Caso int a = 3+3/3; ??? -> | declarator EQUAL initializer (218)
+    
         RegisterType registerType = semanticStack.peekRegisterType();
         RegisterId registerId;
         do {
@@ -210,32 +210,70 @@ public class Semantic {
         } while (registerId != null);
 
         semanticStack.popRegisterType();
-        
     }
     
-    // Caso int a = 3+3/3; ??? -> | declarator EQUAL initializer (218)
-    
-
     // Traduccion de expresiones --> Strings ignorados
     public void rememberConst(Symbol s){
         // SQueue.add(new RS("RS_DO", (String) s.value, "Constant"));
-        semanticStack.push( new RegisterDo());
+        semanticStack.push( new RegisterDo(s.value.toString(), KindDo.CONSTANT));
     }
     
     public void rememberOP(Symbol s){
-        SQueue.add(new RS("RS_OP", (String) s.value));
+        // SQueue.add(new RS("RS_OP", (String) s.value));
+        semanticStack.push( new RegisterOperator(s.value.toString()));
     }
     
     public void rememberVar(Symbol s){
+        /*
         RS RS_DO = new RS("RS_DO", (String) s.value, "Address");
         //Verificar en ST
         if (!containsSymbolName(RS_DO.value)){ //Error
             ST.add(new STNode(RS_DO.value, "ERROR", "scope", String.valueOf(s.right+1))); 
         }
         SQueue.add(RS_DO);
+        */
+        
+        RegisterDo registerDo = new RegisterDo(s.value.toString(), KindDo.ADDRESS);
+        
+        //Verificar que la variable este declarada en la tabla de símbolos:
+        if (!containsSymbolName(registerDo.getValue())){ //Error
+            ST.add(new STNode(registerDo.getValue(), "ERROR", String.valueOf(s.right+1))); 
+        }
+        semanticStack.push(registerDo);
     }
     
     public void evalBinary(){
+        RegisterDo registerDo2 = semanticStack.popRegisterDo();
+        RegisterDo registerDo1 = semanticStack.popRegisterDo();
+        RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator
+        
+        // si ambos son variables, buscar en tabla de simbolos y validar tipos:
+        if(registerDo1.getType() == KindDo.ADDRESS && registerDo2.getType() == KindDo.ADDRESS){
+            STNode symbol1 = findSymbol(registerDo1.getValue());
+            STNode symbol2 = findSymbol(registerDo2.getValue()); // buscar en tabla de simbolos
+            
+            if (symbol1 != null && symbol2 != null) { // si no son nulos, (fueron declarados):
+                if(isOperable (symbol1,symbol2,registerOperator.getValue())){ // si se pueden operar entre si:
+                
+                // generar codigo de operacion
+                } else {
+                    
+                // error
+                }             
+            }
+        }else if(registerDo1.getType() == KindDo.CONSTANT && registerDo2.getType() == KindDo.CONSTANT) {
+            // constant folding
+        
+        }else{
+        // ver cual de los dos DOs es CONSTANT y validar si son operables de forma similar al primer caso
+        }
+        
+        
+
+        
+    }
+    
+    public void evalBinary1(){
         RS RS_DO2 = SQueue.get(-1), RS_OP = SQueue.get(-2), RS_DO1 = SQueue.get(-3);
         
         for (int i = 0; i < 3; i++)
@@ -283,8 +321,6 @@ public class Semantic {
     }
     
     public void evalUnary(){} //incremento (Var), decremento (Var)
-    
-    
     
     // Acciones Semanticas para IF
     
@@ -377,6 +413,21 @@ public class Semantic {
     public String getNextLabel(String labelName) {
         return labelName + sequenceNumber++;
     }
+        
+    public STNode findSymbol(String symbolName){
+        for(STNode symbol : ST){
+            if(symbolName.equals(symbol.getSymbolName())){
+                return symbol;
+            
+            }
+        }
+        return null;
+    }
+    
+    public boolean isOperable(STNode symbol1, STNode symbol2, String operator){
+        return symbol1.getType().equals(symbol2.getType());
+    }
+    
     
     //Function <---
     

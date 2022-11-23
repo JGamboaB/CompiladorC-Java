@@ -9,6 +9,7 @@ import lexer.SemanticRegisters.RegisterCompoundStatement;
 import lexer.SemanticRegisters.RegisterDo;
 import lexer.SemanticRegisters.RegisterId;
 import lexer.SemanticRegisters.RegisterIf;
+import lexer.SemanticRegisters.RegisterOperator;
 import lexer.SemanticRegisters.RegisterType;
 import lexer.SemanticRegisters.RegisterVar;
 import lexer.SemanticRegisters.RegisterWhile;
@@ -159,7 +160,51 @@ public class SemanticStack {
             }
         }
         return null;
-    }   
+    }  
+    
+    public RegisterVar popRegisterVar(){
+        for(int i = registers.size()-1; i>=0; i--){
+            iRegister register = registers.get(i);
+            RegisterVar registerVar = register.getAsRegisterVar();
+            if(registerVar != null){
+                registers.remove(i);
+                return registerVar;
+            }
+        }
+        return null;
+    }
+    public RegisterVar peekRegisterVar(){
+        for(int i = registers.size()-1; i>=0; i--){
+            iRegister register = registers.get(i);
+            RegisterVar registerVar = register.getAsRegisterVar();
+            if(registerVar != null){
+                return registerVar;
+            }
+        }
+        return null;
+    } 
+    
+    public RegisterOperator popRegisterOperator(){
+        for(int i = registers.size()-1; i>=0; i--){
+            iRegister register = registers.get(i);
+            RegisterOperator registerOperator = register.getAsRegisterOperator();
+            if(registerOperator != null){
+                registers.remove(i);
+                return registerOperator;
+            }
+        }
+        return null;
+    }
+    public RegisterOperator peekRegisterOperator(){
+        for(int i = registers.size()-1; i>=0; i--){
+            iRegister register = registers.get(i);
+            RegisterOperator registerOperator = register.getAsRegisterOperator();
+            if(registerOperator != null){
+                return registerOperator;
+            }
+        }
+        return null;
+    }
     
     public RegisterVar popRegisterVarUntilRegisterCompoundStatement(){
         for(int i = registers.size()-1; i>=0; i--){

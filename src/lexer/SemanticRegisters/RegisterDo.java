@@ -9,7 +9,23 @@ package lexer.SemanticRegisters;
  * @author Sara
  */
 public class RegisterDo implements iRegister{
+    private String value;
+    private KindDo type;
 
+    public RegisterDo(String value, KindDo type) {
+        this.value = value;
+        this.type = type;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public KindDo getType() {
+        return type;
+    }
+    
+    
     @Override
     public RegisterIf getAsRegisterIf() {
         return null;
@@ -42,6 +58,11 @@ public class RegisterDo implements iRegister{
 
     @Override
     public RegisterVar getAsRegisterVar() {
+        return null;
+    }
+
+    @Override
+    public RegisterOperator getAsRegisterOperator() {
         return null;
     }
     

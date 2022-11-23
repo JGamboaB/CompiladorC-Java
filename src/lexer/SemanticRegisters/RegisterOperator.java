@@ -8,17 +8,18 @@ package lexer.SemanticRegisters;
  *
  * @author Sara
  */
-public class RegisterVar implements iRegister{
-    private String name;
+public class RegisterOperator implements iRegister{
+    
+    private String value;
 
-    public String getName() {
-        return name;
+    public RegisterOperator(String value) {
+        this.value = value;
     }
 
-    public RegisterVar(String name) {
-        this.name = name;
+    public String getValue() {
+        return value;
     }
-
+        
     @Override
     public RegisterIf getAsRegisterIf() {
         return null;
@@ -51,12 +52,12 @@ public class RegisterVar implements iRegister{
 
     @Override
     public RegisterVar getAsRegisterVar() {
-        return this;
+        return null;
     }
 
     @Override
     public RegisterOperator getAsRegisterOperator() {
-        return null;
+        return this;
     }
     
 }
