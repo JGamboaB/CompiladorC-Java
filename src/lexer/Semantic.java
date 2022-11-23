@@ -204,9 +204,13 @@ public class Semantic {
         do {
             registerId = semanticStack.popRegisterIdUntilRegisterType();
             if(registerId != null){
-                //ToDo: validar si ya esta en tabla de simbolos
-                ST.add(new STNode(registerId.getName(), registerType.getType(), String.valueOf(s.right+1)));
-                semanticStack.push(new RegisterVar(registerId.getName()));
+                if(!containsSymbolName(registerId.getName())){ // validar si no esta en tabla de simbolos
+                    ST.add(new STNode(registerId.getName(), registerType.getType(), String.valueOf(s.right+1)));
+                    semanticStack.push(new RegisterVar(registerId.getName()));
+                } else {
+                    // ToDo: Reportar error
+                }
+
             }
         } while (registerId != null);
 
@@ -257,22 +261,37 @@ public class Semantic {
                 if(isOperable (symbol1,symbol2,registerOperator.getValue())){ // si se pueden operar entre si:
                 
                 // ToDo: generar codigo de operacion
+                // ToDo: Crear RS_DO de tipo dirección con el lugar donde quedo el resultado (registro o var)
                 } else {
                     
-                // ToDo: error
+                // ToDo: Reportar error
                 }             
             }
         }else if(registerDo1.getType() == KindDo.CONSTANT && registerDo2.getType() == KindDo.CONSTANT) {
             // ToDo: constant folding
+            // ToDo: Crear RS_DO de tipo constante con resultado
         
         }else{
         // ToDo: ver cual de los dos DOs es CONSTANT y validar si son operables de forma similar al primer caso
-        }
+        // ToDo: si es operable: generar codigo asm y crear RS_DO con direccion de donde queda el resultado
+        }   
+    }
+    
+    public void evalAssignment(){
+        RegisterDo registerDo2 = semanticStack.popRegisterDo();
+        RegisterDo registerDo1 = semanticStack.popRegisterDo();
+        RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator 
         
+        /*
+        verificar que do1 es variable y esta definida en tabla de simbolos
+        do2: si es variable y esta definida en tabla de simbolos, conseguir valor de tabla de simbolos
         
-
+        actualizar valor de do1 en tabla de simbolos
+        pop de do2, do1 y operador
+        */
         
     }
+    
     
     public void evalBinary1(){
         RS RS_DO2 = SQueue.get(-1), RS_OP = SQueue.get(-2), RS_DO1 = SQueue.get(-3);
@@ -321,9 +340,19 @@ public class Semantic {
         
     }
     
-    public void evalUnary(){} //incremento (Var), decremento (Var)
+    public void evalUnary(){
+        //incremento (Var), decremento (Var)
+        RegisterDo registerDo1 = semanticStack.popRegisterDo();
+        RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator 
+        
+        /*
+        verificar que do1 es variable y esta definida en tabla de simbolos
+        actualizar valor de do1 en tabla de simbolos
+        pop de do1 y operador
+        */
+    } 
     
-    // Acciones Semanticas para IF   
+    // Acciones Semanticas para IF    
         /*
             -> selection_statement
             IF #startIf LPAR expression RPAR #testIf compound_statement ELSE #startElse statement #endIf
@@ -340,8 +369,9 @@ public class Semantic {
     }
     
     public void testIf(){
-        RegisterDo registerDo = semanticStack.popRegisterDo();   
-        // ToDo: generar el codigo de la evaluacion segun la direccion de registerDo
+        RegisterDo registerDo = semanticStack.popRegisterDo(); // este DO viene de un #evalBinary, trae el registro en value
+        // ToDo: generar el codigo de la evaluacion segun la direccion de registerDo -> CMP [registro], 0 (?)
+        generatedCode += "CMP ";
         generatedCode += "JZ " +semanticStack.peekRegisterIf().getLabelElse() + "\n"; // generar jump condicional con RS_IF.else_label
     }
     
@@ -388,10 +418,10 @@ public class Semantic {
     // Acciones Semanticas para COMPOUND STATEMENT (bloque)
         /*
             -> compound_statement
-            #startCompountStatement LBRACES RBRACES #endCompountStatement
-            #startCompountStatement LBRACES statement_list RBRACES #endCompountStatement
-            #startCompountStatement LBRACES declaration_list RBRACES #endCompountStatement
-            #startCompountStatement LBRACES declaration_list statement_list RBRACES #endCompountStatement
+            #startCompoundStatement LBRACES RBRACES #endCompoundStatement
+            #startCompoundStatement LBRACES statement_list RBRACES #endCompoundStatement
+            #startCompoundStatement LBRACES declaration_list RBRACES #endCompoundStatement
+            #startCompoundStatement LBRACES declaration_list statement_list RBRACES #endCompoundStatement
     
             - Maneja el SCOPE
             - aplica en IF, WHILE, ...
@@ -416,7 +446,7 @@ public class Semantic {
             CONTINUE #registerContinue SEMICOLON 
             BREAK #registerBreak SEMICOLON
     
-            ToDo: implementar analisis semantico para el for (no generacion de codigo)
+            ToDo: (maybe) implementar analisis semantico para el for (no generacion de codigo)
         */
     
     public void registerContinue(){       
@@ -451,7 +481,7 @@ public class Semantic {
     }
     
     public boolean isOperable(STNode symbol1, STNode symbol2, String operator){
-        // ToDo: reemplazar logica a que solo vea si se esta operando STRING con !STRING
+        // ToDo: reemplazar logica a que solo vea si se esta operando STRING con !STRING (char?)
         return symbol1.getType().equals(symbol2.getType());
     }
     

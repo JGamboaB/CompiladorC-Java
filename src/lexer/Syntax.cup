@@ -73,7 +73,7 @@ postfix_expression
 	| postfix_expression LPAR RPAR
 	| postfix_expression LPAR argument_expression_list RPAR
 	| postfix_expression DOT ID
-	| postfix_expression OPINCDEC
+	| postfix_expression OPINCDEC // #evalUnary
 	;
 
 argument_expression_list
@@ -83,8 +83,8 @@ argument_expression_list
 
 unary_expression
 	::= postfix_expression
-	| OPINCDEC unary_expression
-	| unary_operator cast_expression
+	| OPINCDEC unary_expression // #evalUnary
+	| unary_operator cast_expression 
 	;
 
 unary_operator
@@ -110,45 +110,45 @@ specifier_qualifier_list
 
 cast_expression
 	::= unary_expression
-	| LPAR specifier_qualifier_list RPAR cast_expression
+	| LPAR specifier_qualifier_list RPAR cast_expression 
 	;
 
 multiplicative_expression
 	::= cast_expression
-	| multiplicative_expression MULT cast_expression
-	| multiplicative_expression DIV cast_expression
-	| multiplicative_expression MOD cast_expression
+	| multiplicative_expression MULT cast_expression // #evalBinary
+	| multiplicative_expression DIV cast_expression // #evalBinary
+	| multiplicative_expression MOD cast_expression // #evalBinary
 	;
 
 additive_expression
 	::= multiplicative_expression
-	| additive_expression SUM multiplicative_expression
-	| additive_expression MINUS multiplicative_expression
+	| additive_expression SUM multiplicative_expression // #evalBinary
+	| additive_expression MINUS multiplicative_expression // #evalBinary
 	;
 
 relational_expression
 	::= additive_expression
-	| relational_expression OPRELATIONAL additive_expression
+	| relational_expression OPRELATIONAL additive_expression // #evalBinary
 	;
 
 equality_expression
 	::= relational_expression
-	| equality_expression OPEQUALITY relational_expression
+	| equality_expression OPEQUALITY relational_expression // #evalBinary 1==2-1 
 	;
 
 logical_and_expression
 	::= equality_expression
-	| logical_and_expression AND equality_expression
+	| logical_and_expression AND equality_expression // #evalBinary
 	;
 
 logical_or_expression
 	::= logical_and_expression
-	| logical_or_expression OR logical_and_expression
+	| logical_or_expression OR logical_and_expression // #evalBinary
 	;
 
 assignment_expression
 	::= logical_or_expression
-	| unary_expression assignment_operator assignment_expression
+	| unary_expression assignment_operator assignment_expression // #evalAssignment
 	;
 
 assignment_operator
