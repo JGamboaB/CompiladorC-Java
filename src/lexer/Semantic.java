@@ -204,7 +204,8 @@ public class Semantic {
         do {
             registerId = semanticStack.popRegisterIdUntilRegisterType();
             if(registerId != null){
-                ST.add(new STNode(registerId.getName(), registerType.getType(), "scope", String.valueOf(s.right+1)));
+                //ToDo: validar si ya esta en tabla de simbolos
+                ST.add(new STNode(registerId.getName(), registerType.getType(), String.valueOf(s.right+1)));
                 semanticStack.push(new RegisterVar(registerId.getName()));
             }
         } while (registerId != null);
@@ -255,17 +256,17 @@ public class Semantic {
             if (symbol1 != null && symbol2 != null) { // si no son nulos, (fueron declarados):
                 if(isOperable (symbol1,symbol2,registerOperator.getValue())){ // si se pueden operar entre si:
                 
-                // generar codigo de operacion
+                // ToDo: generar codigo de operacion
                 } else {
                     
-                // error
+                // ToDo: error
                 }             
             }
         }else if(registerDo1.getType() == KindDo.CONSTANT && registerDo2.getType() == KindDo.CONSTANT) {
-            // constant folding
+            // ToDo: constant folding
         
         }else{
-        // ver cual de los dos DOs es CONSTANT y validar si son operables de forma similar al primer caso
+        // ToDo: ver cual de los dos DOs es CONSTANT y validar si son operables de forma similar al primer caso
         }
         
         
@@ -322,9 +323,9 @@ public class Semantic {
     
     public void evalUnary(){} //incremento (Var), decremento (Var)
     
-    // Acciones Semanticas para IF
-    
+    // Acciones Semanticas para IF   
         /*
+            -> selection_statement
             IF #startIf LPAR expression RPAR #testIf compound_statement ELSE #startElse statement #endIf
             IF #startIf LPAR expression RPAR #testIf compound_statement #endif 
         */
@@ -355,8 +356,8 @@ public class Semantic {
     }
     
     // Acciones Semanticas para WHILE
-    
         /*
+            -> iteration_statement
             WHILE #startWhile LPAR expression RPAR #testWhile compound_statement #endWhile
         */
     
@@ -374,7 +375,7 @@ public class Semantic {
     
     public void testWhile(){
         RegisterDo registerDo = semanticStack.popRegisterDo();
-        // generar el codigo de la evaluacion segun la direccion de registerDo
+        // ToDo: generar el codigo de la evaluacion segun la direccion de registerDo
         generatedCode += "JZ " + semanticStack.peekRegisterWhile().getLabelExit()+"/n"; // generar jump condicional con RS_WHILE.exit_label
     }
     
@@ -386,6 +387,7 @@ public class Semantic {
     
     // Acciones Semanticas para COMPOUND STATEMENT (bloque)
         /*
+            -> compound_statement
             #startCompountStatement LBRACES RBRACES #endCompountStatement
             #startCompountStatement LBRACES statement_list RBRACES #endCompountStatement
             #startCompountStatement LBRACES declaration_list RBRACES #endCompountStatement
@@ -408,6 +410,30 @@ public class Semantic {
         semanticStack.popRegisterCompoundStatement();
     }
     
+    // Acciones Semanticas para BREAK y CONTINUE
+        /*
+            -> jump_statement
+            CONTINUE #registerContinue SEMICOLON 
+            BREAK #registerBreak SEMICOLON
+    
+            ToDo: implementar analisis semantico para el for (no generacion de codigo)
+        */
+    
+    public void registerContinue(){       
+        if(semanticStack.peekRegisterWhile()!=null){
+            generatedCode += "JUMP" + semanticStack.peekRegisterWhile().getLabelWhile()+"/n";
+        } else {
+            // ToDo: reportar error
+        }
+    }
+    public void registerBreak(){
+        if(semanticStack.peekRegisterWhile()!=null){
+            generatedCode += "JUMP" + semanticStack.peekRegisterWhile().getLabelExit()+"/n";
+        } else {
+            // ToDo: reportar error
+        }
+    }
+    
     // auxiliary functions
     
     public String getNextLabel(String labelName) {
@@ -425,6 +451,7 @@ public class Semantic {
     }
     
     public boolean isOperable(STNode symbol1, STNode symbol2, String operator){
+        // ToDo: reemplazar logica a que solo vea si se esta operando STRING con !STRING
         return symbol1.getType().equals(symbol2.getType());
     }
     
