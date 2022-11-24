@@ -11,6 +11,11 @@ package lexer.SemanticRegisters;
 public class RegisterDo implements iRegister{
     private String value;
     private KindDo type;
+    
+    @Override
+    public void print(){
+        System.out.println("DO\tval: "+this.value+"\ttype: " + this.type);
+    }
 
     public RegisterDo(String value, KindDo type) {
         this.value = value;

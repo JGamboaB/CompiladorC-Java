@@ -11,6 +11,11 @@ package lexer.SemanticRegisters;
 public class RegisterWhile implements iRegister {
     private String labelWhile = "";
     private String labelExit = "";
+    
+    @Override
+    public void print() {
+        System.out.println("While\tWL: "+this.labelWhile+"\tEL: "+this.labelExit);
+    }
 
     public String getLabelWhile() {
         return labelWhile;
@@ -68,4 +73,5 @@ public class RegisterWhile implements iRegister {
         return null;
     }
     
+   
 }

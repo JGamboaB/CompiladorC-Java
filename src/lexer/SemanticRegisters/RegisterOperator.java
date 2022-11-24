@@ -9,8 +9,12 @@ package lexer.SemanticRegisters;
  * @author Sara
  */
 public class RegisterOperator implements iRegister{
-    
     private String value;
+    
+    @Override
+    public void print() {
+        System.out.println("Operator\tvalue: "+this.value);
+    }
 
     public RegisterOperator(String value) {
         this.value = value;

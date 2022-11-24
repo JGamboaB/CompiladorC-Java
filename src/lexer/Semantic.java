@@ -15,30 +15,16 @@ import lexer.SemanticRegisters.RegisterWhile;
 import lexer.SemanticRegisters.iRegister;
 
 public class Semantic {
-    /*Register -> Tipo, id, operador, DO (constante/direccion), if, while
-    
-    Tipo -> .tipo
-    id -> .name
-    DO -> .tipo, .valor / .name
-    Operador -> .operador
-    if -> exit_label, else_label
-    while -> exit_label, while_label
-   
-    */
     private SemanticStack semanticStack = new SemanticStack();
     private String generatedCode = "";
     private int sequenceNumber = 0;
-
+    
     public SemanticStack getSemanticStack() {
         return semanticStack;
     }
 
     public void setSemanticStack(SemanticStack semanticStack) {
         this.semanticStack = semanticStack;
-    }
-
-    public static void setSQueue(Queue SQueue) {
-        Semantic.SQueue = SQueue;
     }
 
     public int getSequenceNumber() {
@@ -56,60 +42,6 @@ public class Semantic {
     public void setGeneratedCode(String generatedCode) {
         this.generatedCode = generatedCode;
     }
-    
-    
-    public static class RS{
-        String label; // RS_Type, RS_ID, RS_OP, RS_IF, RS_WHILE
-        String value;//token_actual -> Symbol s.value
-        String type; //Address or Constant      // RS_DO
-        String exit_label, else_while_label;    //RS_IF, RS_WHILE
-
-        public RS(String label, String value) { //RS_Type, RS_ID, RS_OP
-            this.label = label;
-            this.value = value;
-        }
-
-        public RS(String label, String value, String type) { //RS_DO
-            this.label = label;
-            this.value = value;
-            this.type = type;
-        }
-        
-        public RS(String label) { //RS_IF, RS_WHILE
-            this.label = label;
-        }
-        
-        public RS(){}
-    }
-    
-    //Pila 
-    public static class Queue extends ArrayList<RS>{
-        public RS getLastRS_Type(){
-            Collections.reverse(this);
-            for (RS i : this){
-                if (i.label.equals("RS_Type")){
-                    Collections.reverse(this);
-                    return i;
-                }
-            }
-            
-            Collections.reverse(this);
-            return null;
-        }
-        
-        public void printQueue(){
-            for (RS i: this){
-                if (i.value != null)
-                    System.out.print("Value: "+i.value + " --> ");
-                else {
-                    System.out.print("Exit_label: "+i.exit_label + "Else_While_label: "+i.else_while_label +" --> ");
-                }
-            }
-        }
-    }
-    
-    public static Queue SQueue = new Queue();
-   
     
     //Tabla de simbolos ST
     public static class STNode{
@@ -151,6 +83,12 @@ public class Semantic {
     }
     
     public static ArrayList<STNode> ST = new ArrayList();
+    public void printST(){
+        for (STNode n: ST){
+            n.print();
+        }
+    }
+    
     
     public boolean containsSymbolName(String n){
         for (STNode node: ST){
@@ -292,7 +230,7 @@ public class Semantic {
         
     }
     
-    
+/*    
     public void evalBinary1(){
         RS RS_DO2 = SQueue.get(-1), RS_OP = SQueue.get(-2), RS_DO1 = SQueue.get(-3);
         
@@ -323,23 +261,17 @@ public class Semantic {
                     //ERROR --> 1 = 1 
                     ;
             }
-            
-            RS_DO.value = String.valueOf(val);
-            
+            RS_DO.value = String.valueOf(val); 
         } else {
             int val1, val2;
             if (!RS_DO1.type.equals("Address"))
                 val1 = Integer.valueOf(RS_DO1.value);
             else {
                 //val1 = SQueue.   
-            }
-            
+            } 
         }
-     
-        
-        
     }
-    
+    */
     public void evalUnary(){
         //incremento (Var), decremento (Var)
         RegisterDo registerDo1 = semanticStack.popRegisterDo();

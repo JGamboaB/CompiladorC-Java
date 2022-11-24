@@ -10,6 +10,11 @@ package lexer.SemanticRegisters;
  */
 public class RegisterType implements iRegister{
     private String type;
+    
+    @Override
+    public void print() {
+        System.out.println("Type\ttype: "+this.type);
+    }
 
     public String getType() {
         return type;

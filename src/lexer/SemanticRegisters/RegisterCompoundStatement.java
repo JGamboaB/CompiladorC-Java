@@ -9,7 +9,12 @@ package lexer.SemanticRegisters;
  * @author Sara
  */
 public class RegisterCompoundStatement implements iRegister {
-
+    
+    @Override
+    public void print(){
+        System.out.println("Compound statement");
+    }
+    
     @Override
     public RegisterIf getAsRegisterIf() {
         return null;

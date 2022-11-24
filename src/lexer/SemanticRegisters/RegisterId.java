@@ -9,8 +9,12 @@ package lexer.SemanticRegisters;
  * @author Sara
  */
 public class RegisterId implements iRegister{
-    
     private String name;
+    
+    @Override
+    public void print(){
+        System.out.println("ID\tname: "+this.name);
+    }
 
     public String getName() {
         return name;

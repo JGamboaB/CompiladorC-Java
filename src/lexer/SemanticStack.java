@@ -26,6 +26,12 @@ public class SemanticStack {
         return registers;
     }
     
+    public void print(){
+        for (iRegister r: this.registers){
+            r.print();
+        }
+    }
+    
     public void push(iRegister register){
         registers.add(register);
     }

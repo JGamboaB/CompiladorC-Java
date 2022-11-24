@@ -11,6 +11,11 @@ package lexer.SemanticRegisters;
 public class RegisterIf implements iRegister{
     private String labelElse = "";
     private String labelExit = "";
+    
+    @Override
+    public void print() {
+        System.out.println("IF\tElseL: "+this.labelElse+"\tEL: "+this.labelExit);
+    }
 
     public void setLabelElse(String labelElse) {
         this.labelElse = labelElse;
@@ -67,5 +72,6 @@ public class RegisterIf implements iRegister{
     public RegisterOperator getAsRegisterOperator() {
         return null;
     }
+    
     
 }

@@ -10,6 +10,11 @@ package lexer.SemanticRegisters;
  */
 public class RegisterVar implements iRegister{
     private String name;
+    
+    @Override
+    public void print() {
+        System.out.println("VAR\tname: "+this.name);
+    }
 
     public String getName() {
         return name;
