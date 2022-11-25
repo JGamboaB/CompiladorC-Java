@@ -27,7 +27,8 @@ public class SemanticStack {
     }
     
     public void print(){
-        for (iRegister r: this.registers){
+        for (int i = registers.size()-1; i>=0; i--){
+            iRegister r = registers.get(i);
             r.print();
         }
     }

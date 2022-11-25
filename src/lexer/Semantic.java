@@ -45,10 +45,12 @@ public class Semantic {
     
     //Tabla de simbolos ST
     public static class STNode{
-        private String symbolName;
-        private String type;
+        private String symbolName;  // a
+        private String type; // int
         private String returnType;
         private String line;
+        private boolean active;
+        private String nasm;
 
         public STNode(String symbolName, String type, String returnType, String line) {
             this.symbolName = symbolName;
@@ -74,11 +76,15 @@ public class Semantic {
         public String getType() { return type; }
         public String getReturnType() { return returnType; }
         public String getLine() { return line; }
+        public boolean isActive() { return active; }
+        public String getNasm() {return nasm;}
         
         public void setSymbolName(String symbolName) { this.symbolName = symbolName; }
         public void setType(String type) { this.type = type; }
         public void setReturnType(String returnType) { this.returnType = returnType; }
         public void setLine(String line) { this.line = line; }
+        public void setActive(boolean active) {this.active = active;}
+        public void setNasm(String nasm) {this.nasm = nasm;}
         
     }
     
@@ -185,34 +191,111 @@ public class Semantic {
         semanticStack.push(registerDo);
     }
     
+    public String[] getRegisterNotUsed(String RG){
+        switch(RG){
+            case "BX": return new String[]{"CX", "DX"};
+            case "CX": return new String[]{"BX", "DX"};
+            case "DX": return new String[]{"BX", "CX"};
+            default: return new String[]{"BX", "CX"};
+        }
+    }
+    
     public void evalBinary(){
-        RegisterDo registerDo2 = semanticStack.popRegisterDo();
+        RegisterDo registerDo2 = semanticStack.popRegisterDo();//a = DO --> move [a]
         RegisterDo registerDo1 = semanticStack.popRegisterDo();
         RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator
+        RegisterDo DO;
         
-        // si ambos son variables, buscar en tabla de simbolos y validar tipos:
-        if(registerDo1.getType() == KindDo.ADDRESS && registerDo2.getType() == KindDo.ADDRESS){
-            STNode symbol1 = findSymbol(registerDo1.getValue());
-            STNode symbol2 = findSymbol(registerDo2.getValue()); // buscar en tabla de simbolos
+        if(registerDo1.getType() == KindDo.CONSTANT && registerDo2.getType() == KindDo.CONSTANT) {
+            int val = 0;
+            boolean bool;
             
-            if (symbol1 != null && symbol2 != null) { // si no son nulos, (fueron declarados):
-                if(isOperable (symbol1,symbol2,registerOperator.getValue())){ // si se pueden operar entre si:
-                
-                // ToDo: generar codigo de operacion
-                // ToDo: Crear RS_DO de tipo dirección con el lugar donde quedo el resultado (registro o var)
-                } else {
-                    
-                // ToDo: Reportar error
-                }             
+            switch(registerOperator.getValue()){
+                case "+" -> val = Integer.valueOf(registerDo1.getValue()) + Integer.valueOf(registerDo2.getValue());
+                case "-" -> val = Integer.valueOf(registerDo1.getValue()) - Integer.valueOf(registerDo2.getValue());
+                case "*" -> val = Integer.valueOf(registerDo1.getValue()) * Integer.valueOf(registerDo2.getValue());
+                case "/" -> val = Integer.valueOf(registerDo1.getValue()) / Integer.valueOf(registerDo2.getValue());
+                case "==" -> {
+                    bool = Integer.valueOf(registerDo1.getValue()) == Integer.valueOf(registerDo2.getValue());
+                    val = (bool)? 1 : 0;
+                }
+                case "!=" -> { 
+                    bool = Integer.valueOf(registerDo1.getValue()) != Integer.valueOf(registerDo2.getValue());
+                    val = (bool)? 1 : 0;
+                }
+                case ">=" -> {
+                    bool = Integer.valueOf(registerDo1.getValue()) >= Integer.valueOf(registerDo2.getValue());
+                    val = (bool)? 1 : 0;
+                }
+                case ">" -> {
+                    bool = Integer.valueOf(registerDo1.getValue()) > Integer.valueOf(registerDo2.getValue());
+                    val = (bool)? 1 : 0;
+                }
+                case "<=" -> {
+                    bool = Integer.valueOf(registerDo1.getValue()) <= Integer.valueOf(registerDo2.getValue());
+                    val = (bool)? 1 : 0;
+                }
+                case "<" -> {
+                    bool = Integer.valueOf(registerDo1.getValue()) < Integer.valueOf(registerDo2.getValue());
+                    val = (bool)? 1 : 0;
+                }
+                case "&&" -> {
+                    int a = Integer.parseInt(registerDo1.getValue()), b = Integer.parseInt(registerDo2.getValue());
+                    var ax = (a==1);
+                    var bx = (b==1);
+                    bool = ax && bx;
+                    val = (bool)? 1 : 0;
+                }
+                case "||" -> {
+                    int c = Integer.parseInt(registerDo1.getValue()), d = Integer.parseInt(registerDo2.getValue());
+                    var cx = (c==1);
+                    var dx = (d==1);
+                    bool = cx || dx;
+                    val = (bool)? 1 : 0;
+                }
+                default -> {
+                    //Tirar ERROR --> 1 = 2   
+                }
             }
-        }else if(registerDo1.getType() == KindDo.CONSTANT && registerDo2.getType() == KindDo.CONSTANT) {
-            // ToDo: constant folding
-            // ToDo: Crear RS_DO de tipo constante con resultado
+            DO = new RegisterDo(String.valueOf(val), KindDo.CONSTANT);
+            
+        } else {
+            String DO1 = registerDo1.getValue();
+            String DO2 = registerDo2.getValue();
+            String REGISTER = "AX";
+            
+            switch (registerDo1.getType()){
+                case ADDRESS:
+                    DO1 = "word ["+DO1+"]";
+                    break;
+                case MEMORY:
+                    REGISTER = DO1;
+                    break;
+            }
+            
+            switch (registerDo2.getType()){
+                case ADDRESS:
+                    DO2 = "word ["+DO2+"]";
+                    break;
+                case MEMORY:
+                    REGISTER = DO2;
+                    break;
+            }
+            String RGs[] = getRegisterNotUsed(REGISTER);
+            
+
+            switch(registerOperator.getValue()){
+                case "+":
+                    generatedCode += "mov " + RGs[0] + ", " + DO1 + "\n" +
+                            "mov " + RGs[1] + ", " + DO2 + "\n" +
+                            "add " + RGs[0] + ", " + RGs[1] + "\n";
+                    DO = new RegisterDo(RGs[0], KindDo.MEMORY);
+                    break;
+                    
+            }
+        } 
         
-        }else{
-        // ToDo: ver cual de los dos DOs es CONSTANT y validar si son operables de forma similar al primer caso
-        // ToDo: si es operable: generar codigo asm y crear RS_DO con direccion de donde queda el resultado
-        }   
+        semanticStack.push(DO);  
     }
     
     public void evalAssignment(){

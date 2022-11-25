@@ -10,5 +10,6 @@ package lexer.SemanticRegisters;
  */
 public enum KindDo {
     CONSTANT,
-    ADDRESS
+    ADDRESS,
+    MEMORY
 }
