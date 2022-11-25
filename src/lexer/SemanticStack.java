@@ -5,6 +5,7 @@
 package lexer;
 
 import java.util.ArrayList;
+import lexer.SemanticRegisters.KindDo;
 import lexer.SemanticRegisters.RegisterCompoundStatement;
 import lexer.SemanticRegisters.RegisterDo;
 import lexer.SemanticRegisters.RegisterId;
@@ -31,6 +32,17 @@ public class SemanticStack {
             iRegister r = registers.get(i);
             r.print();
         }
+    }
+    
+    public ArrayList<String> getNASMVarsUsed(){
+        ArrayList<String> res = new ArrayList();
+        for(int i = registers.size()-1; i>=0; i--){
+            iRegister register = registers.get(i);
+            RegisterDo registerDo = register.getAsRegisterDo();
+            if(registerDo != null && registerDo.getType() == KindDo.MEMORY){
+                res.add(registerDo.getValue());
+            }
+        } return res;
     }
     
     public void push(iRegister register){

@@ -18,6 +18,7 @@ public class Semantic {
     private SemanticStack semanticStack = new SemanticStack();
     private String generatedCode = "";
     private int sequenceNumber = 0;
+    private ArrayList<String> NASMVars = new ArrayList<>();
     
     public SemanticStack getSemanticStack() {
         return semanticStack;
@@ -103,44 +104,43 @@ public class Semantic {
         }return false;
     }
     
-    /*
-            TO-DO
-                1. Acciones semanticas
-                2. Sintaxis
-                3. Interfaz
-                4. Generar ASM :c
-                5. Documentacion :cc
-    */
+    public STNode returnNode(String n){
+        for (STNode node: ST){
+            if(node.symbolName.equals(n))
+                return node;      
+        } return null;
+    }
+    
+    public String getFreeNASMVar(){
+        if (NASMVars.isEmpty()){
+            NASMVars.add("R0");
+            return "R0";
+        }
+        ArrayList<String> possibleMatches = NASMVars;
+        possibleMatches.removeAll(semanticStack.getNASMVarsUsed());
+        
+        if (!possibleMatches.isEmpty()){
+            return possibleMatches.get(0);
+        } else {
+            NASMVars.add("R"+NASMVars.size());
+            return NASMVars.get(-1);
+        }    
+    }
     
     // ====> Acciones Semanticas
     
     // Traduccion de Declaraciones
     public void rememberType(Symbol s){
-        // SQueue.add(new RS("RS_Type", (String) s.value));
         RegisterType registerType =new RegisterType(s.value.toString());
         semanticStack.push(registerType);
     }
     
     public void rememberID(Symbol s){
-      //  SQueue.add(new RS("RS_ID", (String) s.value));
       RegisterId registerId = new RegisterId(s.value.toString());
       semanticStack.push(registerId);
     }
     
     public void declInsertTS(Symbol s){
-    /*
-        RS type = SQueue.getLastRS_Type();
-        RS top = SQueue.get(-1);
-        while (top != type){
-            SQueue.remove(-1); //POP RS_ID
-            //Verificar
-            if (!containsSymbolName(top.value)){
-                ST.add(new STNode(top.value, type.value, "scope", String.valueOf(s.right+1)));
-            } else { //Error
-                ST.add(new STNode(top.value, "ERROR", "scope", String.valueOf(s.right+1))); 
-            } top = SQueue.get(-1);   
-        } SQueue.remove(-1); //POP RS_Type
-    */
     // Caso int a = 3+3/3; ??? -> | declarator EQUAL initializer (218)
     
         RegisterType registerType = semanticStack.peekRegisterType();
@@ -149,7 +149,9 @@ public class Semantic {
             registerId = semanticStack.popRegisterIdUntilRegisterType();
             if(registerId != null){
                 if(!containsSymbolName(registerId.getName())){ // validar si no esta en tabla de simbolos
-                    ST.add(new STNode(registerId.getName(), registerType.getType(), String.valueOf(s.right+1)));
+                    STNode n = new STNode(registerId.getName(), registerType.getType(), String.valueOf(s.right+1));
+                    n.setActive(true); n.setNasm(getNextLabel(registerId.getName()));
+                    ST.add(n);
                     semanticStack.push(new RegisterVar(registerId.getName()));
                 } else {
                     // ToDo: Reportar error
@@ -163,25 +165,14 @@ public class Semantic {
     
     // Traduccion de expresiones --> Strings ignorados
     public void rememberConst(Symbol s){
-        // SQueue.add(new RS("RS_DO", (String) s.value, "Constant"));
         semanticStack.push( new RegisterDo(s.value.toString(), KindDo.CONSTANT));
     }
     
     public void rememberOP(Symbol s){
-        // SQueue.add(new RS("RS_OP", (String) s.value));
         semanticStack.push( new RegisterOperator(s.value.toString()));
     }
     
-    public void rememberVar(Symbol s){
-        /*
-        RS RS_DO = new RS("RS_DO", (String) s.value, "Address");
-        //Verificar en ST
-        if (!containsSymbolName(RS_DO.value)){ //Error
-            ST.add(new STNode(RS_DO.value, "ERROR", "scope", String.valueOf(s.right+1))); 
-        }
-        SQueue.add(RS_DO);
-        */
-        
+    public void rememberVar(Symbol s){      
         RegisterDo registerDo = new RegisterDo(s.value.toString(), KindDo.ADDRESS);
         
         //Verificar que la variable este declarada en la tabla de símbolos:
@@ -191,111 +182,92 @@ public class Semantic {
         semanticStack.push(registerDo);
     }
     
-    public String[] getRegisterNotUsed(String RG){
-        switch(RG){
-            case "BX": return new String[]{"CX", "DX"};
-            case "CX": return new String[]{"BX", "DX"};
-            case "DX": return new String[]{"BX", "CX"};
-            default: return new String[]{"BX", "CX"};
-        }
-    }
+    
     
     public void evalBinary(){
         RegisterDo registerDo2 = semanticStack.popRegisterDo();//a = DO --> move [a]
         RegisterDo registerDo1 = semanticStack.popRegisterDo();
         RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator
-        RegisterDo DO;
+        RegisterDo DO = null;
+        
+        //Validate Compatible Types (int, char, short, long) != string & En Tabla de Simbolos --> generar NASMName
         
         if(registerDo1.getType() == KindDo.CONSTANT && registerDo2.getType() == KindDo.CONSTANT) {
             int val = 0;
-            boolean bool;
             
             switch(registerOperator.getValue()){
                 case "+" -> val = Integer.valueOf(registerDo1.getValue()) + Integer.valueOf(registerDo2.getValue());
                 case "-" -> val = Integer.valueOf(registerDo1.getValue()) - Integer.valueOf(registerDo2.getValue());
                 case "*" -> val = Integer.valueOf(registerDo1.getValue()) * Integer.valueOf(registerDo2.getValue());
                 case "/" -> val = Integer.valueOf(registerDo1.getValue()) / Integer.valueOf(registerDo2.getValue());
-                case "==" -> {
-                    bool = Integer.valueOf(registerDo1.getValue()) == Integer.valueOf(registerDo2.getValue());
-                    val = (bool)? 1 : 0;
-                }
-                case "!=" -> { 
-                    bool = Integer.valueOf(registerDo1.getValue()) != Integer.valueOf(registerDo2.getValue());
-                    val = (bool)? 1 : 0;
-                }
-                case ">=" -> {
-                    bool = Integer.valueOf(registerDo1.getValue()) >= Integer.valueOf(registerDo2.getValue());
-                    val = (bool)? 1 : 0;
-                }
-                case ">" -> {
-                    bool = Integer.valueOf(registerDo1.getValue()) > Integer.valueOf(registerDo2.getValue());
-                    val = (bool)? 1 : 0;
-                }
-                case "<=" -> {
-                    bool = Integer.valueOf(registerDo1.getValue()) <= Integer.valueOf(registerDo2.getValue());
-                    val = (bool)? 1 : 0;
-                }
-                case "<" -> {
-                    bool = Integer.valueOf(registerDo1.getValue()) < Integer.valueOf(registerDo2.getValue());
-                    val = (bool)? 1 : 0;
-                }
-                case "&&" -> {
-                    int a = Integer.parseInt(registerDo1.getValue()), b = Integer.parseInt(registerDo2.getValue());
-                    var ax = (a==1);
-                    var bx = (b==1);
-                    bool = ax && bx;
-                    val = (bool)? 1 : 0;
-                }
-                case "||" -> {
-                    int c = Integer.parseInt(registerDo1.getValue()), d = Integer.parseInt(registerDo2.getValue());
-                    var cx = (c==1);
-                    var dx = (d==1);
-                    bool = cx || dx;
-                    val = (bool)? 1 : 0;
-                }
                 default -> {
                     //Tirar ERROR --> 1 = 2   
                 }
             }
             DO = new RegisterDo(String.valueOf(val), KindDo.CONSTANT);
             
-        } else {
+        } else if (registerDo1.getType() != KindDo.MEMORY && registerDo2.getType() != KindDo.MEMORY){
             String DO1 = registerDo1.getValue();
             String DO2 = registerDo2.getValue();
-            String REGISTER = "AX";
+            String DO1copy = DO1;
+            String RX = getFreeNASMVar();
             
-            switch (registerDo1.getType()){
-                case ADDRESS:
-                    DO1 = "word ["+DO1+"]";
-                    break;
-                case MEMORY:
-                    REGISTER = DO1;
-                    break;
-            }
+            if (registerDo1.getType() == KindDo.ADDRESS)
+                DO1 = "word ["+returnNode(DO1).nasm+"]"; //get NASMname from TABLE
+                 
+            if (registerDo1.getType() == KindDo.ADDRESS)
+                DO2 = "word ["+returnNode(DO2).nasm+"]"; //get NASMname from TABLE
             
-            switch (registerDo2.getType()){
-                case ADDRESS:
-                    DO2 = "word ["+DO2+"]";
-                    break;
-                case MEMORY:
-                    REGISTER = DO2;
-                    break;
-            }
-            String RGs[] = getRegisterNotUsed(REGISTER);
-            
-
             switch(registerOperator.getValue()){
-                case "+":
-                    generatedCode += "mov " + RGs[0] + ", " + DO1 + "\n" +
-                            "mov " + RGs[1] + ", " + DO2 + "\n" +
-                            "add " + RGs[0] + ", " + RGs[1] + "\n";
-                    DO = new RegisterDo(RGs[0], KindDo.MEMORY);
-                    break;
+                case "+" -> {
+                    generatedCode += "mov BX, " + DO1 + "\n" +
+                            "mov CX, " + DO2 + "\n" +
+                            "add BX, CX\n" +
+                            "mov word["+RX+"], BX\n";
+                    DO = new RegisterDo(RX, KindDo.MEMORY);
+                    //Insert into Table with type and 'MEMORY'// ADD TO TABLE
+                    //STNode n = new STNode(RX, DO1_Type, "-1"); //DO1_Type = int / char / long / short
+                    //n.setActive(true); n.setNasm(RX);
+                    //ST.add(n);
+                } case "-" -> {
+                    generatedCode += "mov BX, " + DO1 + "\n" +
+                            "mov CX, " + DO2 + "\n" +
+                            "sub BX, CX\n";
+                    DO = new RegisterDo("BX", KindDo.MEMORY);
+                    //Insert into Table with type and 'MEMORY'
+                } case "*" -> {
+                    //Must Check That AX & BX not used anywhere else in the Stack
                     
+                    generatedCode += "mov AX, " + DO1 + "\n" +
+                            "mov BX, " + DO2 + "\n" +
+                            "mul BL\n";
+                    DO = new RegisterDo("AX", KindDo.MEMORY);
+                    //Insert into Table with type and 'MEMORY'
+                } case "/" -> {
+                    //Must Check That AX & BX not used anywhere else in the Stack
+                    
+                    generatedCode += "mov AX, " + DO1 + "\n" +
+                            "mov BX, " + DO2 + "\n" +
+                            "div BL\nxor AH, AH\n";
+                    DO = new RegisterDo("AX", KindDo.MEMORY);
+                    //Insert into Table with type and 'MEMORY'
+                } default -> {
+                    //Assignment  
+                    if (registerDo1.getType() == KindDo.ADDRESS){ //Validate DO1 is ADDRESS
+                        generatedCode += "mov " + DO1 + ", " + DO2 +"\n";
+                        DO = new RegisterDo(DO1copy, KindDo.MEMORY);
+                    } else {
+                        //ERROR
+                        //DO = new RegisterDo("ERROR", KindDo.MEMORY);
+                    }     
+                }     
             }
-        } 
+        } else { //Contains Memory Address
+            
+        }
         
-        semanticStack.push(DO);  
+        if (DO!=null)
+            semanticStack.push(DO);  
     }
     
     public void evalAssignment(){
@@ -313,48 +285,6 @@ public class Semantic {
         
     }
     
-/*    
-    public void evalBinary1(){
-        RS RS_DO2 = SQueue.get(-1), RS_OP = SQueue.get(-2), RS_DO1 = SQueue.get(-3);
-        
-        for (int i = 0; i < 3; i++)
-            SQueue.remove(-1);
-        
-        //Validar tipos de DO junto con el operador -> Sumas, Restas, Multiplicaciones, Divisiones, y asignaciones) 
-        //Falta: Validar Que no haya strings (excepto en asignacion)
-        RS RS_DO = new RS();
-        if ("Constant".equals(RS_DO1.type) && "Constant".equals(RS_DO2.type)){
-            RS_DO.type = "Constant";
-            
-            int val = 0;
-            switch(RS_OP.value){
-                case "+":
-                    val = Integer.valueOf(RS_DO1.value) + Integer.valueOf(RS_DO2.value);
-                    break;
-                case "-":
-                    val = Integer.valueOf(RS_DO1.value) - Integer.valueOf(RS_DO2.value);
-                    break;
-                case "*":
-                    val = Integer.valueOf(RS_DO1.value) * Integer.valueOf(RS_DO2.value);
-                    break;
-                case "/":
-                    val = Integer.valueOf(RS_DO1.value) / Integer.valueOf(RS_DO2.value);
-                    break;
-                default:
-                    //ERROR --> 1 = 1 
-                    ;
-            }
-            RS_DO.value = String.valueOf(val); 
-        } else {
-            int val1, val2;
-            if (!RS_DO1.type.equals("Address"))
-                val1 = Integer.valueOf(RS_DO1.value);
-            else {
-                //val1 = SQueue.   
-            } 
-        }
-    }
-    */
     public void evalUnary(){
         //incremento (Var), decremento (Var)
         RegisterDo registerDo1 = semanticStack.popRegisterDo();
@@ -383,7 +313,7 @@ public class Semantic {
         semanticStack.push(registerIf); //Push RS_IF
     }
     
-    public void testIf(){
+    public void testIf(){ //Generar con sus JUMPS respectivos
         RegisterDo registerDo = semanticStack.popRegisterDo(); // este DO viene de un #evalBinary, trae el registro en value
         // ToDo: generar el codigo de la evaluacion segun la direccion de registerDo -> CMP [registro], 0 (?)
         generatedCode += "CMP ";
@@ -503,40 +433,19 @@ public class Semantic {
     
     //Function <---
     
-    /*
-    public static void main(String args[]) {
-        int a, b;
-        RS_Type var1 = new RS_Type();
-        var1.value = "int";
-        RS_ID var2 = new RS_ID();
-        var2.value = "a";
-        RS_ID var3 = new RS_ID();
-        var3.value = "b";
-
-        RS_Type var11 = new RS_Type();
-        var11.value = "char";
-        RS_ID var21 = new RS_ID();
-        var21.value = "a";
-        RS_ID var31 = new RS_ID();
-        var31.value = "b";
-
-        Queue q = new Queue();
-        q.add(var1);
-        q.add(var2);
-        q.add(var3);
-        q.add(var11);
-        q.add(var21);
-        q.add(var31);
-
-        System.out.println(q.getLastRS_Type().value);
-        q.printQueue();
-        
-        
-        ST.add(new STNode("main","function","int","global","21"));
-        ST.add(new STNode("x","integer","local","1"));
-        ST.add(new STNode("z","char","for loop","64"));
-        for (STNode node : ST){
-            node.print();
-        }
-    }*/
 }
+
+/*
+TO DO:
+Usar RX en evalBinary y que se inserte correctamente en la tabla;
+evalLogical / evalBoolean <-- Solo en IFs y Whiles
+evalUnary
+
+IF, WHILE
+Functions
+
+Meter en sintaxis
+Terminar UI
+
+Documentacion
+*/
