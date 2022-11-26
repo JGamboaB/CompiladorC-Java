@@ -56,7 +56,7 @@ non terminal primary_expression, postfix_expression, argument_expression_list,
     parameter_list, identifier_list, declarator, initializer_list, initializer, init_declarator, 
     init_declarator_list, declaration_specifiers, declaration,  jump_statement, iteration_statement,
     selection_statement, expression_statement, labeled_statement, statement, statement_list, instruction_statement,
-    compound_statement, declaration_list, func_declaration, declarations, program
+    compound_statement, declaration_list, void_specifier, func_declaration, declarations, program
 ;
 
 start with program;
@@ -200,9 +200,9 @@ declarator
 	| LPAR declarator RPAR
 	| declarator LBRACKET logical_or_expression RBRACKET
 	| declarator LBRACKET RBRACKET
-	| declarator LPAR parameter_list RPAR
+	| declarator LPAR parameter_list:i RPAR {: Semantic.declFunction("", iright, ileft); :}
 	| declarator LPAR identifier_list RPAR
-	| declarator LPAR RPAR
+	| declarator:i LPAR RPAR {: Semantic.declFunction("", iright, ileft); :}
         | declarator LPAR error RPAR {: parser.report_error("Parameter/identifier error"); :}
 	;
 
@@ -236,7 +236,7 @@ declaration_specifiers
 
 declaration
 	::= declaration_specifiers SEMICOLON
-	| declaration_specifiers init_declarator_list SEMICOLON:i {: Semantic.declInsertTS(i.toString(), iright, ileft); Semantic.printST(); Semantic.printErrors(); :}
+	| declaration_specifiers init_declarator_list SEMICOLON:i {: Semantic.declInsertTS(i.toString(), iright, ileft); Semantic.printST(); Semantic.printErrors(); Semantic.printSemanticStack(); :}
         | declaration_specifiers error SEMICOLON {: parser.report_error("Declaration error"); :}
 	;
 
@@ -323,11 +323,15 @@ declaration_list
 	| declaration_list declaration 
 	;
 
+void_specifier
+        ::= VOID:i {: Semantic.rememberType(i.toString()); :}
+        ;
+
 func_declaration
-	::= declaration_specifiers declarator declaration_list compound_statement 
-        | VOID declarator declaration_list compound_statement 
+	::= declaration_specifiers declarator declaration_list compound_statement
+        | void_specifier declarator declaration_list compound_statement 
 	| declaration_specifiers declarator compound_statement
-        | VOID declarator compound_statement
+        | void_specifier declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
         | error compound_statement {: parser.report_error("Defining function/main error"); :}

@@ -205,7 +205,12 @@ public class Compiler extends javax.swing.JFrame {
             }
             
             // Semantic results
+            System.out.println("STATS :: END");
+            Semantic.printSemanticStack();
+            Semantic.printST();
+            Semantic.printErrors();
             Semantic.newRun();
+            
             
             reader = new BufferedReader(new FileReader(filename));
             Lexer lexer = new Lexer(reader);

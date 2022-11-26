@@ -179,7 +179,17 @@ public class SemanticStack {
             }
         }
         return null;
-    }  
+    } 
+    public RegisterId getFirstRegisterId(){
+        for(int i = 0; i<registers.size(); i++){
+            iRegister register = registers.get(i);
+            RegisterId registerId = register.getAsRegisterId();
+            if(registerId != null){
+                return registerId;
+            }
+        }
+        return null;
+    }
     
     public RegisterVar popRegisterVar(){
         for(int i = registers.size()-1; i>=0; i--){

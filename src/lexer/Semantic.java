@@ -27,6 +27,7 @@ public class Semantic {
     public String getGeneratedCode() {return generatedCode;}
     public void setGeneratedCode(String generatedCode) {this.generatedCode = generatedCode;}
     public static void printErrors(){System.out.println("/ / / ERRORS / / /\n"+semanticErrors);}
+    public static void printSemanticStack(){ System.out.println("/ / / Semantic Stack / / /"); semanticStack.print(); System.out.println(); }
     
     //Tabla de simbolos ST
     public static class STNode{
@@ -68,6 +69,7 @@ public class Semantic {
         public void setReturnType(String returnType) { this.returnType = returnType; }
         public void setLine(String line) { this.line = line; }
         public void setNasm(String nasm) {this.nasm = nasm;}
+        public void setScope(String s) {this.scope = s;}
     }
     
     public static ArrayList<STNode> ST = new ArrayList();
@@ -136,6 +138,39 @@ public class Semantic {
     }
     
     // Traduccion de funciones
+    public static void declFunction(String i, int iright, int ileft){ // SEMANTIC STACK MUST BE CLEAN OF R_TYPES AND R_IDs <--------
+        RegisterId RID_func = semanticStack.getFirstRegisterId(); //main
+        
+        RegisterId RID = semanticStack.popRegisterId(); //r
+        RegisterType RType = semanticStack.popRegisterType(); //int(r)
+        while (RID != RID_func){ //Parameters here
+            if (!containsSymbolName(RID.getName())){ //No en la tabla de simbolos
+                STNode n = new STNode(RID.getName(), RType.getType(), String.valueOf(iright+1));
+                n.setNasm(getNextLabel(RID.getName()));
+                n.setScope("Function-parameter");
+                ST.add(n);
+                semanticStack.push(new RegisterVar(RID.getName()));
+            } else {
+                semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + RID.getName()
+                    + "'): Name already used to declare a variable/function/parameter.\n";
+            } 
+            RID = semanticStack.popRegisterId(); 
+            RType = semanticStack.popRegisterType();
+        }
+        
+        // Function
+        
+        if(!containsSymbolName(RID.getName())){ // Validar que no esté en tabla de simbolos.
+            STNode n = new STNode(RID.getName(), "function",RType.getType(), String.valueOf(iright+1));
+            n.setNasm(getNextLabel(RID.getName()));
+            n.setScope("Global");
+            ST.add(n);
+            semanticStack.push(new RegisterVar(RID.getName()));
+        } else { //Reportar error que esta.
+            semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + RID.getName()
+                + "'): Name already used to declare a variable/function.\n";
+        }
+    }
     
     // Traduccion de expresiones --> Strings ignorados
     public void rememberConst(Symbol s){
