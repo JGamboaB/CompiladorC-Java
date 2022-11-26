@@ -35,6 +35,10 @@ parser code
         errorMSG += ("Error (Line: " + (s.right) + ", Column: "+ (s.left)+ ", Value: EOF): Syntax Error\n");
         errorMSG += " ==> Unrecoverable syntax error\n\n";
     }
+
+    public void printS(){
+        System.out.println(s.value);
+    }
 :};
 
 terminal DOT, BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, ELSE, FOR, IF,
@@ -95,10 +99,10 @@ unary_operator
 	;
 
 type_specifier
-        ::= CHAR
-        | SHORT
-        | INT
-        | LONG
+        ::= CHAR:i {: Semantic.rememberType(i.toString()); :}
+        | SHORT:i {: Semantic.rememberType(i.toString()); :}
+        | INT:i {: Semantic.rememberType(i.toString()); :}
+        | LONG:i {: Semantic.rememberType(i.toString()); :}
         ;
 
 specifier_qualifier_list
@@ -128,27 +132,27 @@ additive_expression
 
 relational_expression
 	::= additive_expression
-	| relational_expression OPRELATIONAL additive_expression // #evalBinary
+	| relational_expression OPRELATIONAL additive_expression // #evalLogical
 	;
 
 equality_expression
 	::= relational_expression
-	| equality_expression OPEQUALITY relational_expression // #evalBinary 1==2-1 
+	| equality_expression OPEQUALITY relational_expression // #evalLogical 1==2-1 
 	;
 
 logical_and_expression
 	::= equality_expression
-	| logical_and_expression AND equality_expression // #evalBinary
+	| logical_and_expression AND equality_expression // #evalLogical
 	;
 
 logical_or_expression
 	::= logical_and_expression
-	| logical_or_expression OR logical_and_expression // #evalBinary
+	| logical_or_expression OR logical_and_expression // #evalLogical
 	;
 
 assignment_expression
 	::= logical_or_expression
-	| unary_expression assignment_operator assignment_expression // #evalAssignment
+	| unary_expression assignment_operator assignment_expression // #evalBinary
 	;
 
 assignment_operator
@@ -192,7 +196,7 @@ identifier_list
 	;
 
 declarator 
-	::= ID {: rememberID(s); :}
+	::= ID:i {: Semantic.rememberID(i.toString()); :}
 	| LPAR declarator RPAR
 	| declarator LBRACKET logical_or_expression RBRACKET
 	| declarator LBRACKET RBRACKET
@@ -224,15 +228,15 @@ init_declarator_list
 	;
 
 declaration_specifiers
-	::= type_specifier {: rememberType(s); :}
-	| type_specifier {: rememberType(s); :} CONST
-	| CONST type_specifier {: rememberType(s); :}
+	::= type_specifier
+	| type_specifier CONST
+	| CONST type_specifier
 	| CONST
 	;
 
 declaration
 	::= declaration_specifiers SEMICOLON
-	| declaration_specifiers init_declarator_list SEMICOLON {: declInsertTS(s); :}
+	| declaration_specifiers init_declarator_list SEMICOLON:i {: Semantic.declInsertTS(i.toString(), iright, ileft); Semantic.printST(); Semantic.printErrors(); :}
         | declaration_specifiers error SEMICOLON {: parser.report_error("Declaration error"); :}
 	;
 
@@ -326,7 +330,7 @@ func_declaration
         | VOID declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
-        | error compound_statement {: parser.report_error("Defining function/main error");:}
+        | error compound_statement {: parser.report_error("Defining function/main error"); :}
 	;
 
 /*  START */
@@ -338,6 +342,6 @@ declarations
     ;
 
 program 
-    ::= declarations
-    | program declarations
+    ::=  declarations
+    |  program declarations
     ;

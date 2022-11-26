@@ -15,52 +15,36 @@ import lexer.SemanticRegisters.RegisterWhile;
 import lexer.SemanticRegisters.iRegister;
 
 public class Semantic {
-    private SemanticStack semanticStack = new SemanticStack();
-    private String generatedCode = "";
-    private int sequenceNumber = 0;
-    private ArrayList<String> NASMVars = new ArrayList<>();
+    private static SemanticStack semanticStack = new SemanticStack();
+    private static String generatedCode = "";
+    private static int sequenceNumber = 0;
+    private static String semanticErrors = "";
     
-    public SemanticStack getSemanticStack() {
-        return semanticStack;
-    }
-
-    public void setSemanticStack(SemanticStack semanticStack) {
-        this.semanticStack = semanticStack;
-    }
-
-    public int getSequenceNumber() {
-        return sequenceNumber;
-    }
-
-    public void setSequenceNumber(int sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
-    }
-    
-    public String getGeneratedCode() {
-        return generatedCode;
-    }
-
-    public void setGeneratedCode(String generatedCode) {
-        this.generatedCode = generatedCode;
-    }
+    public SemanticStack getSemanticStack() {return semanticStack;}
+    public void setSemanticStack(SemanticStack semanticStack) {this.semanticStack = semanticStack;}
+    public int getSequenceNumber() { return sequenceNumber;}
+    public void setSequenceNumber(int sequenceNumber) {this.sequenceNumber = sequenceNumber;}
+    public String getGeneratedCode() {return generatedCode;}
+    public void setGeneratedCode(String generatedCode) {this.generatedCode = generatedCode;}
+    public static void printErrors(){System.out.println("/ / / ERRORS / / /\n"+semanticErrors);}
     
     //Tabla de simbolos ST
     public static class STNode{
         private String symbolName;  // a
         private String type; // int
         private String returnType;
+        private String scope; //Global, Local, Function-Parameter
         private String line;
-        private boolean active;
         private String nasm;
 
-        public STNode(String symbolName, String type, String returnType, String line) {
+        public STNode(String symbolName, String type, String returnType, String line) { //Function
             this.symbolName = symbolName;
             this.type = type;
             this.returnType = returnType;
             this.line = line;
         }
         
-        public STNode(String symbolName, String type, String line) {
+        public STNode(String symbolName, String type, String line) { //Variable
             this.symbolName = symbolName;
             this.type = type;
             this.returnType = null;
@@ -68,36 +52,33 @@ public class Semantic {
         }        
         
         public void print() {
-            System.out.print("\nname: " + this.symbolName + "\t" +
-                "type: " + this.type + "\t" + "return-type: " + this.returnType + "\t" +
-                "scope: " + "\t" + "line: " + this.line);
+            System.out.println("Name: " + this.symbolName + "\t" +
+                "Type: " + this.type + "\t" + "Return-type: " + this.returnType + "\t" +
+                "Scope: " + this.scope + "\t" + "Line: " + this.line + " NASM_Name: " + this.nasm);
         }
         
         public String getSymbolName() { return symbolName; }
         public String getType() { return type; }
         public String getReturnType() { return returnType; }
         public String getLine() { return line; }
-        public boolean isActive() { return active; }
         public String getNasm() {return nasm;}
         
         public void setSymbolName(String symbolName) { this.symbolName = symbolName; }
         public void setType(String type) { this.type = type; }
         public void setReturnType(String returnType) { this.returnType = returnType; }
         public void setLine(String line) { this.line = line; }
-        public void setActive(boolean active) {this.active = active;}
         public void setNasm(String nasm) {this.nasm = nasm;}
-        
     }
     
     public static ArrayList<STNode> ST = new ArrayList();
-    public void printST(){
+    public static void printST(){
+        System.out.println("/ / / / Symbols Table / / / /");
         for (STNode n: ST){
             n.print();
         }
     }
     
-    
-    public boolean containsSymbolName(String n){
+    public static boolean containsSymbolName(String n){
         for (STNode node: ST){
             if(node.symbolName.equals(n))
                 return true;      
@@ -111,57 +92,50 @@ public class Semantic {
         } return null;
     }
     
-    public String getFreeNASMVar(){
-        if (NASMVars.isEmpty()){
-            NASMVars.add("R0");
-            return "R0";
-        }
-        ArrayList<String> possibleMatches = NASMVars;
-        possibleMatches.removeAll(semanticStack.getNASMVarsUsed());
-        
-        if (!possibleMatches.isEmpty()){
-            return possibleMatches.get(0);
-        } else {
-            NASMVars.add("R"+NASMVars.size());
-            return NASMVars.get(-1);
-        }    
+    public static void newRun(){ // ????????????????????????????????????????????????????????????????????
+        semanticStack = new SemanticStack();
+        generatedCode = "";
+        sequenceNumber = 0;
+        semanticErrors = "";
+        ST = new ArrayList();
+        System.out.println("End of Run");
     }
     
-    // ====> Acciones Semanticas
+    // / / / / / / / / / / / / / / / / / / / / / / / / / / Acciones Semanticas
     
     // Traduccion de Declaraciones
-    public void rememberType(Symbol s){
-        RegisterType registerType =new RegisterType(s.value.toString());
+    public static void rememberType(String i){
+        RegisterType registerType = new RegisterType(i);
         semanticStack.push(registerType);
     }
     
-    public void rememberID(Symbol s){
-      RegisterId registerId = new RegisterId(s.value.toString());
+    public static void rememberID(String i){
+      RegisterId registerId = new RegisterId(i);
       semanticStack.push(registerId);
     }
     
-    public void declInsertTS(Symbol s){
-    // Caso int a = 3+3/3; ??? -> | declarator EQUAL initializer (218)
-    
+    public static void declInsertTS(String i, int iright, int ileft){ 
         RegisterType registerType = semanticStack.peekRegisterType();
         RegisterId registerId;
         do {
             registerId = semanticStack.popRegisterIdUntilRegisterType();
             if(registerId != null){
-                if(!containsSymbolName(registerId.getName())){ // validar si no esta en tabla de simbolos
-                    STNode n = new STNode(registerId.getName(), registerType.getType(), String.valueOf(s.right+1));
-                    n.setActive(true); n.setNasm(getNextLabel(registerId.getName()));
+                if(!containsSymbolName(registerId.getName())){ // Validar que no esté en tabla de simbolos.
+                    STNode n = new STNode(registerId.getName(), registerType.getType(), String.valueOf(iright+1));
+                    n.setNasm(getNextLabel(registerId.getName()));
                     ST.add(n);
                     semanticStack.push(new RegisterVar(registerId.getName()));
-                } else {
-                    // ToDo: Reportar error
+                } else { //Reportar error que esta.
+                    semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + registerId.getName()
+                            + "'): Name already used to declare a variable/function.\n";
+                    break;
                 }
-
             }
         } while (registerId != null);
-
         semanticStack.popRegisterType();
     }
+    
+    // Traduccion de funciones
     
     // Traduccion de expresiones --> Strings ignorados
     public void rememberConst(Symbol s){
@@ -173,129 +147,115 @@ public class Semantic {
     }
     
     public void rememberVar(Symbol s){      
-        RegisterDo registerDo = new RegisterDo(s.value.toString(), KindDo.ADDRESS);
+        RegisterDo DO = new RegisterDo(s.value.toString(), KindDo.ADDRESS);
         
         //Verificar que la variable este declarada en la tabla de símbolos:
-        if (!containsSymbolName(registerDo.getValue())){ //Error
-            ST.add(new STNode(registerDo.getValue(), "ERROR", String.valueOf(s.right+1))); 
+        if (!containsSymbolName(s.value.toString())){ //Error
+            ST.add(new STNode(DO.getValue(), "ERROR", String.valueOf(s.right+1))); 
+            semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
+                            + "): Variable/function not declared.\n";
         }
-        semanticStack.push(registerDo);
+        semanticStack.push(DO);
     }
     
     
     
-    public void evalBinary(){
-        RegisterDo registerDo2 = semanticStack.popRegisterDo();//a = DO --> move [a]
-        RegisterDo registerDo1 = semanticStack.popRegisterDo();
-        RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator
-        RegisterDo DO = null;
+    public void evalBinary(Symbol s){
+        RegisterDo DO2 = semanticStack.popRegisterDo();
+        RegisterDo DO1 = semanticStack.popRegisterDo();
+        RegisterOperator OP = semanticStack.popRegisterOperator();//pop operands and operator
+        RegisterDo DO;
         
-        //Validate Compatible Types (int, char, short, long) != string & En Tabla de Simbolos --> generar NASMName
+        // Validate Compatible Types (int, char, short, long) != string //Nasm name generated by getting variable/funcion ///////////////
+        // If KinDo.MEMORY Don't validate types because it must have been validated before (?) --> FIX LATER /////////
         
-        if(registerDo1.getType() == KindDo.CONSTANT && registerDo2.getType() == KindDo.CONSTANT) {
-            int val = 0;
+        if(DO1.getType() == KindDo.CONSTANT && DO2.getType() == KindDo.CONSTANT) {
+            int val;
             
-            switch(registerOperator.getValue()){
-                case "+" -> val = Integer.valueOf(registerDo1.getValue()) + Integer.valueOf(registerDo2.getValue());
-                case "-" -> val = Integer.valueOf(registerDo1.getValue()) - Integer.valueOf(registerDo2.getValue());
-                case "*" -> val = Integer.valueOf(registerDo1.getValue()) * Integer.valueOf(registerDo2.getValue());
-                case "/" -> val = Integer.valueOf(registerDo1.getValue()) / Integer.valueOf(registerDo2.getValue());
+            switch(OP.getValue()){
+                case "+" -> val = Integer.valueOf(DO1.getValue()) + Integer.valueOf(DO2.getValue());
+                case "-" -> val = Integer.valueOf(DO1.getValue()) - Integer.valueOf(DO2.getValue());
+                case "*" -> val = Integer.valueOf(DO1.getValue()) * Integer.valueOf(DO2.getValue());
+                case "/" -> val = Integer.valueOf(DO1.getValue()) / Integer.valueOf(DO2.getValue());
                 default -> {
-                    //Tirar ERROR --> 1 = 2   
+                    semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
+                            + "): Invalid mix of operand(s) with operation.\n";  
+                    return; // EXIT AND DON'T ADD ANYTHING TO THE STACK
                 }
             }
             DO = new RegisterDo(String.valueOf(val), KindDo.CONSTANT);
             
-        } else if (registerDo1.getType() != KindDo.MEMORY && registerDo2.getType() != KindDo.MEMORY){
-            String DO1 = registerDo1.getValue();
-            String DO2 = registerDo2.getValue();
-            String DO1copy = DO1;
-            String RX = getFreeNASMVar();
+        } else { //if (DO1.getType() != KindDo.MEMORY && DO2.getType() != KindDo.MEMORY){
+            String DO1val = DO1.getValue();
+            String DO2val = DO2.getValue();
+            String DO1valcopy = DO1val;
             
-            if (registerDo1.getType() == KindDo.ADDRESS)
-                DO1 = "word ["+returnNode(DO1).nasm+"]"; //get NASMname from TABLE
+            if (DO1.getType() == KindDo.ADDRESS)
+                DO1val = "word ["+returnNode(DO1val).nasm+"]"; //get NASMname from TABLE
                  
-            if (registerDo1.getType() == KindDo.ADDRESS)
-                DO2 = "word ["+returnNode(DO2).nasm+"]"; //get NASMname from TABLE
+            if (DO2.getType() == KindDo.ADDRESS)
+                DO2val = "word ["+returnNode(DO2val).nasm+"]"; //get NASMname from TABLE
             
-            switch(registerOperator.getValue()){
+            switch(OP.getValue()){
                 case "+" -> {
-                    generatedCode += "mov BX, " + DO1 + "\n" +
-                            "mov CX, " + DO2 + "\n" +
-                            "add BX, CX\n" +
-                            "mov word["+RX+"], BX\n";
-                    DO = new RegisterDo(RX, KindDo.MEMORY);
-                    //Insert into Table with type and 'MEMORY'// ADD TO TABLE
-                    //STNode n = new STNode(RX, DO1_Type, "-1"); //DO1_Type = int / char / long / short
-                    //n.setActive(true); n.setNasm(RX);
-                    //ST.add(n);
+                    generatedCode += "mov BX, " + DO1val + "\n" +
+                            "mov CX, " + DO2val + "\n" +
+                            "add BX, CX\n";
+                    DO = new RegisterDo("BX", KindDo.MEMORY);
                 } case "-" -> {
-                    generatedCode += "mov BX, " + DO1 + "\n" +
-                            "mov CX, " + DO2 + "\n" +
+                    generatedCode += "mov BX, " + DO1val + "\n" +
+                            "mov CX, " + DO2val + "\n" +
                             "sub BX, CX\n";
                     DO = new RegisterDo("BX", KindDo.MEMORY);
-                    //Insert into Table with type and 'MEMORY'
-                } case "*" -> {
-                    //Must Check That AX & BX not used anywhere else in the Stack
-                    
-                    generatedCode += "mov AX, " + DO1 + "\n" +
-                            "mov BX, " + DO2 + "\n" +
+                } case "*" -> {                  
+                    generatedCode += "mov AX, " + DO1val + "\n" +
+                            "mov BX, " + DO2val + "\n" +
                             "mul BL\n";
                     DO = new RegisterDo("AX", KindDo.MEMORY);
-                    //Insert into Table with type and 'MEMORY'
                 } case "/" -> {
-                    //Must Check That AX & BX not used anywhere else in the Stack
-                    
-                    generatedCode += "mov AX, " + DO1 + "\n" +
-                            "mov BX, " + DO2 + "\n" +
+                    generatedCode += "mov AX, " + DO1val + "\n" + //Must Check That AX & BX not used anywhere else in the Stack ??
+                            "mov BX, " + DO2val + "\n" +
                             "div BL\nxor AH, AH\n";
                     DO = new RegisterDo("AX", KindDo.MEMORY);
-                    //Insert into Table with type and 'MEMORY'
                 } default -> {
                     //Assignment  
-                    if (registerDo1.getType() == KindDo.ADDRESS){ //Validate DO1 is ADDRESS
-                        generatedCode += "mov " + DO1 + ", " + DO2 +"\n";
-                        DO = new RegisterDo(DO1copy, KindDo.MEMORY);
-                    } else {
-                        //ERROR
-                        //DO = new RegisterDo("ERROR", KindDo.MEMORY);
+                    if (DO1.getType() == KindDo.ADDRESS){ //Validate DO1 is ADDRESS
+                        generatedCode += "mov " + DO1val + ", " + DO2val +"\n";
+                        DO = new RegisterDo(DO1valcopy, KindDo.ADDRESS);
+                    } else { //ERROR
+                        semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
+                            + "): Invalid mix of operand(s) with operation.\n";
+                        return; // EXIT AND DON'T ADD ANYTHING TO THE STACK
                     }     
                 }     
             }
-        } else { //Contains Memory Address
-            
+        } // else {} //Contains Memory Address
+        semanticStack.push(DO);  
+    }
+      
+    public void evalUnary(Symbol s){ //incremento (Var), decremento (Var)
+        RegisterDo DO1 = semanticStack.popRegisterDo();
+        String DO1val = DO1.getValue();
+        RegisterOperator OP = semanticStack.popRegisterOperator();//pop operands and operator 
+        
+        //DO1 already in table
+        // Check it's type can be used in operation -- Anything except string
+        
+        if (DO1.getType() != KindDo.ADDRESS){ //Not a Variable
+            semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
+                            + "): Invalid mix of operand(s) with operation.\n";
+            return; // EXIT AND DON'T ADD ANYTHING TO THE STACK
         }
         
-        if (DO!=null)
-            semanticStack.push(DO);  
-    }
-    
-    public void evalAssignment(){
-        RegisterDo registerDo2 = semanticStack.popRegisterDo();
-        RegisterDo registerDo1 = semanticStack.popRegisterDo();
-        RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator 
+        switch (OP.getValue()){
+            case "++" -> generatedCode += "inc word [" + returnNode(DO1val).nasm + "]\n";
+            case "--" -> generatedCode += "dec word [" + returnNode(DO1val).nasm + "]\n";
+        }
         
-        /*
-        verificar que do1 es variable y esta definida en tabla de simbolos
-        do2: si es variable y esta definida en tabla de simbolos, conseguir valor de tabla de simbolos
-        
-        actualizar valor de do1 en tabla de simbolos
-        pop de do2, do1 y operador
-        */
-        
-    }
-    
-    public void evalUnary(){
-        //incremento (Var), decremento (Var)
-        RegisterDo registerDo1 = semanticStack.popRegisterDo();
-        RegisterOperator registerOperator = semanticStack.popRegisterOperator();//pop operands and operator 
-        
-        /*
-        verificar que do1 es variable y esta definida en tabla de simbolos
-        actualizar valor de do1 en tabla de simbolos
-        pop de do1 y operador
-        */
+        RegisterDo DO = new RegisterDo(DO1val, KindDo.ADDRESS);
+        semanticStack.push(DO);
     } 
+    
     
     // Acciones Semanticas para IF    
         /*
@@ -411,7 +371,7 @@ public class Semantic {
     
     // auxiliary functions
     
-    public String getNextLabel(String labelName) {
+    public static String getNextLabel(String labelName) {
         return labelName + sequenceNumber++;
     }
         
@@ -440,6 +400,7 @@ TO DO:
 Usar RX en evalBinary y que se inserte correctamente en la tabla;
 evalLogical / evalBoolean <-- Solo en IFs y Whiles
 evalUnary
+// active <- desactivar valores de ST
 
 IF, WHILE
 Functions
