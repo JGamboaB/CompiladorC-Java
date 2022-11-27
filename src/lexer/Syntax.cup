@@ -64,10 +64,10 @@ start with program;
 /*  EXPRESSIONS */
 
 primary_expression
-	::= ID
-	| NUMBERLITERAL
-        | CHARLITERAL
-	| STRING
+	::= ID:i {: Semantic.rememberVar(i.toString(), iright, ileft); :}
+	| NUMBERLITERAL:i {: Semantic.rememberConst(i.toString()); :}
+        | CHARLITERAL:i {: Semantic.rememberConst(i.toString()); :}
+	| STRING:i {: Semantic.rememberConst(i.toString()); :}
 	| LPAR expression RPAR
 	;
 
@@ -119,15 +119,15 @@ cast_expression
 
 multiplicative_expression
 	::= cast_expression
-	| multiplicative_expression MULT cast_expression // #evalBinary
-	| multiplicative_expression DIV cast_expression // #evalBinary
-	| multiplicative_expression MOD cast_expression // #evalBinary
+	| multiplicative_expression MULT:i {: Semantic.rememberOP(i.toString()); :} cast_expression {: Semantic.evalBinary("", -1, -1); :} // #evalBinary
+	| multiplicative_expression DIV:i {: Semantic.rememberOP(i.toString()); :} cast_expression {: Semantic.evalBinary("", -1, -1); :} // #evalBinary
+	| multiplicative_expression MOD cast_expression
 	;
 
 additive_expression
 	::= multiplicative_expression
-	| additive_expression SUM multiplicative_expression // #evalBinary
-	| additive_expression MINUS multiplicative_expression // #evalBinary
+	| additive_expression SUM:i {: Semantic.rememberOP(i.toString()); :} multiplicative_expression {: Semantic.evalBinary("", -1, -1); :} // #evalBinary
+	| additive_expression MINUS:i {: Semantic.rememberOP(i.toString()); :} multiplicative_expression {: Semantic.evalBinary("", -1, -1); :} // #evalBinary
 	;
 
 relational_expression
@@ -152,12 +152,12 @@ logical_or_expression
 
 assignment_expression
 	::= logical_or_expression
-	| unary_expression assignment_operator assignment_expression // #evalBinary
+	| unary_expression assignment_operator assignment_expression {: Semantic.evalBinary("", -1, -1); :} // #evalBinary
 	;
 
 assignment_operator
-	::= EQUAL
-	| OPASSIGNMENT
+	::= EQUAL:i {: Semantic.rememberOP(i.toString()); :}
+	| OPASSIGNMENT:i {: Semantic.rememberOP(i.toString()); :}
 	;
 
 expression

@@ -27,6 +27,10 @@ public class Compiler extends javax.swing.JFrame {
         parserPanel.setForeground(Color.WHITE);
         tableErrors.setBackground(new Color(105,120,165) );
         tableErrors.setForeground(Color.WHITE);
+        semanticPanel.setBackground(new Color(105,120,165) );
+        semanticPanel.setForeground(Color.WHITE);
+        stPanel.setBackground(new Color(105,120,165) );
+        stPanel.setForeground(Color.WHITE);
     }
     
     public void populateLexicalErrors(HashSet<LexicalError> errors){
@@ -75,11 +79,11 @@ public class Compiler extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jScrollPane6 = new javax.swing.JScrollPane();
-        parserPanel1 = new javax.swing.JTextPane();
+        semanticPanel = new javax.swing.JTextPane();
         jScrollPane7 = new javax.swing.JScrollPane();
         parserPanel = new javax.swing.JTextPane();
         jScrollPane9 = new javax.swing.JScrollPane();
-        parserPanel2 = new javax.swing.JTextPane();
+        stPanel = new javax.swing.JTextPane();
 
         jScrollPane8.setViewportView(parserPanel5);
 
@@ -117,11 +121,11 @@ public class Compiler extends javax.swing.JFrame {
 
         jLabel6.setText("Symbols Table");
 
-        jScrollPane6.setViewportView(parserPanel1);
+        jScrollPane6.setViewportView(semanticPanel);
 
         jScrollPane7.setViewportView(parserPanel);
 
-        jScrollPane9.setViewportView(parserPanel2);
+        jScrollPane9.setViewportView(stPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -205,10 +209,13 @@ public class Compiler extends javax.swing.JFrame {
             }
             
             // Semantic results
-            System.out.println("STATS :: END");
+            System.out.println("SEMANTIC :=: END");
+            semanticPanel.setText(Semantic.getErrors());
+            stPanel.setText(Semantic.getTextST());
             Semantic.printSemanticStack();
-            Semantic.printST();
-            Semantic.printErrors();
+            System.out.println(Semantic.getGeneratedCode());
+            //Semantic.printST();
+            //Semantic.printErrors();
             Semantic.newRun();
             
             
@@ -544,9 +551,9 @@ public class Compiler extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JScrollPane jScrollPane9;
     private javax.swing.JTextPane parserPanel;
-    private javax.swing.JTextPane parserPanel1;
-    private javax.swing.JTextPane parserPanel2;
     private javax.swing.JTextPane parserPanel5;
+    private javax.swing.JTextPane semanticPanel;
+    private javax.swing.JTextPane stPanel;
     private javax.swing.JTable tableErrors;
     // End of variables declaration//GEN-END:variables
 }

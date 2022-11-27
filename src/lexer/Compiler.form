@@ -184,7 +184,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTextPane" name="parserPanel1">
+        <Component class="javax.swing.JTextPane" name="semanticPanel">
         </Component>
       </SubComponents>
     </Container>
@@ -206,7 +206,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTextPane" name="parserPanel2">
+        <Component class="javax.swing.JTextPane" name="stPanel">
         </Component>
       </SubComponents>
     </Container>

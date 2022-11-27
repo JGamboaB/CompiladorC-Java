@@ -24,8 +24,11 @@ public class Semantic {
     public void setSemanticStack(SemanticStack semanticStack) {this.semanticStack = semanticStack;}
     public int getSequenceNumber() { return sequenceNumber;}
     public void setSequenceNumber(int sequenceNumber) {this.sequenceNumber = sequenceNumber;}
-    public String getGeneratedCode() {return generatedCode;}
+    public static String getGeneratedCode() {return generatedCode;}
     public void setGeneratedCode(String generatedCode) {this.generatedCode = generatedCode;}
+    
+    public static String getErrors(){ return semanticErrors; }
+    
     public static void printErrors(){System.out.println("/ / / ERRORS / / /\n"+semanticErrors);}
     public static void printSemanticStack(){ System.out.println("/ / / Semantic Stack / / /"); semanticStack.print(); System.out.println(); }
     
@@ -58,6 +61,12 @@ public class Semantic {
                 "Scope: " + this.scope + "\t" + "Line: " + this.line + " NASM_Name: " + this.nasm);
         }
         
+        public String getText(){
+            return "Name: " + this.symbolName + "\t" +
+                "Type: " + this.type + "\t" + "Return-type: " + this.returnType + "\t" +
+                "Scope: " + this.scope + "\t" + "Line: " + this.line + " NASM_Name: " + this.nasm + "\n\n";
+        }
+        
         public String getSymbolName() { return symbolName; }
         public String getType() { return type; }
         public String getReturnType() { return returnType; }
@@ -80,6 +89,13 @@ public class Semantic {
         }
     }
     
+    public static String getTextST(){
+        String res = "";
+        for (STNode n: ST){
+            res += n.getText();
+        } return res;
+    }
+    
     public static boolean containsSymbolName(String n){
         for (STNode node: ST){
             if(node.symbolName.equals(n))
@@ -87,14 +103,14 @@ public class Semantic {
         }return false;
     }
     
-    public STNode returnNode(String n){
+    public static STNode returnNode(String n){
         for (STNode node: ST){
             if(node.symbolName.equals(n))
                 return node;      
         } return null;
     }
     
-    public static void newRun(){ // ????????????????????????????????????????????????????????????????????
+    public static void newRun(){
         semanticStack = new SemanticStack();
         generatedCode = "";
         sequenceNumber = 0;
@@ -124,12 +140,13 @@ public class Semantic {
             if(registerId != null){
                 if(!containsSymbolName(registerId.getName())){ // Validar que no esté en tabla de simbolos.
                     STNode n = new STNode(registerId.getName(), registerType.getType(), String.valueOf(iright+1));
-                    n.setNasm(getNextLabel(registerId.getName()));
+                    //n.setNasm(getNextLabel(registerId.getName()));
+                    n.setNasm(registerId.getName());
                     ST.add(n);
                     semanticStack.push(new RegisterVar(registerId.getName()));
                 } else { //Reportar error que esta.
                     semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + registerId.getName()
-                            + "'): Name already used to declare a variable/function.\n";
+                            + "'): Name already used to declare a variable/function.\n\n";
                     break;
                 }
             }
@@ -146,13 +163,14 @@ public class Semantic {
         while (RID != RID_func){ //Parameters here
             if (!containsSymbolName(RID.getName())){ //No en la tabla de simbolos
                 STNode n = new STNode(RID.getName(), RType.getType(), String.valueOf(iright+1));
-                n.setNasm(getNextLabel(RID.getName()));
+                //n.setNasm(getNextLabel(RID.getName()));
+                n.setNasm(RID.getName());
                 n.setScope("Function-parameter");
                 ST.add(n);
                 semanticStack.push(new RegisterVar(RID.getName()));
             } else {
                 semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + RID.getName()
-                    + "'): Name already used to declare a variable/function/parameter.\n";
+                    + "'): Name already used to declare a variable/function/parameter.\n\n";
             } 
             RID = semanticStack.popRegisterId(); 
             RType = semanticStack.popRegisterType();
@@ -162,40 +180,41 @@ public class Semantic {
         
         if(!containsSymbolName(RID.getName())){ // Validar que no esté en tabla de simbolos.
             STNode n = new STNode(RID.getName(), "function",RType.getType(), String.valueOf(iright+1));
-            n.setNasm(getNextLabel(RID.getName()));
+            //n.setNasm(getNextLabel(RID.getName()));
+            n.setNasm(RID.getName());
             n.setScope("Global");
             ST.add(n);
             semanticStack.push(new RegisterVar(RID.getName()));
         } else { //Reportar error que esta.
             semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + RID.getName()
-                + "'): Name already used to declare a variable/function.\n";
+                + "'): Name already used to declare a variable/function.\n\n";
         }
     }
     
     // Traduccion de expresiones --> Strings ignorados
-    public void rememberConst(Symbol s){
-        semanticStack.push( new RegisterDo(s.value.toString(), KindDo.CONSTANT));
+    public static void rememberConst(String s){
+        semanticStack.push( new RegisterDo(s, KindDo.CONSTANT));
     }
     
-    public void rememberOP(Symbol s){
-        semanticStack.push( new RegisterOperator(s.value.toString()));
+    public static void rememberOP(String s){
+        semanticStack.push( new RegisterOperator(s));
     }
     
-    public void rememberVar(Symbol s){      
-        RegisterDo DO = new RegisterDo(s.value.toString(), KindDo.ADDRESS);
+    public static void rememberVar(String i, int iright, int ileft){      
+        RegisterDo DO = new RegisterDo(i, KindDo.ADDRESS);
         
         //Verificar que la variable este declarada en la tabla de símbolos:
-        if (!containsSymbolName(s.value.toString())){ //Error
-            ST.add(new STNode(DO.getValue(), "ERROR", String.valueOf(s.right+1))); 
-            semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
-                            + "): Variable/function not declared.\n";
+        if (!containsSymbolName(i)){ //Error
+            ST.add(new STNode(DO.getValue(), "ERROR", String.valueOf(iright+1))); 
+            semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + i
+                            + "): Variable/function not declared.\n\n";
         }
         semanticStack.push(DO);
     }
     
     
     
-    public void evalBinary(Symbol s){
+    public static void evalBinary(String i, int iright, int ileft){
         RegisterDo DO2 = semanticStack.popRegisterDo();
         RegisterDo DO1 = semanticStack.popRegisterDo();
         RegisterOperator OP = semanticStack.popRegisterOperator();//pop operands and operator
@@ -213,8 +232,8 @@ public class Semantic {
                 case "*" -> val = Integer.valueOf(DO1.getValue()) * Integer.valueOf(DO2.getValue());
                 case "/" -> val = Integer.valueOf(DO1.getValue()) / Integer.valueOf(DO2.getValue());
                 default -> {
-                    semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
-                            + "): Invalid mix of operand(s) with operation.\n";  
+                    semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + i
+                            + "): Invalid mix of operand(s) with operation.\n\n";  
                     return; // EXIT AND DON'T ADD ANYTHING TO THE STACK
                 }
             }
@@ -258,8 +277,8 @@ public class Semantic {
                         generatedCode += "mov " + DO1val + ", " + DO2val +"\n";
                         DO = new RegisterDo(DO1valcopy, KindDo.ADDRESS);
                     } else { //ERROR
-                        semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
-                            + "): Invalid mix of operand(s) with operation.\n";
+                        semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + i
+                            + "): Invalid mix of operand(s) with operation.\n\n";
                         return; // EXIT AND DON'T ADD ANYTHING TO THE STACK
                     }     
                 }     
@@ -278,7 +297,7 @@ public class Semantic {
         
         if (DO1.getType() != KindDo.ADDRESS){ //Not a Variable
             semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
-                            + "): Invalid mix of operand(s) with operation.\n";
+                            + "): Invalid mix of operand(s) with operation.\n\n";
             return; // EXIT AND DON'T ADD ANYTHING TO THE STACK
         }
         
