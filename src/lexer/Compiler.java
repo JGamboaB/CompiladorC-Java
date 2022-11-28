@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java_cup.runtime.Symbol;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
@@ -22,14 +23,18 @@ public class Compiler extends javax.swing.JFrame {
      * Creates new form JFrame
      */
     public Compiler() {
-        initComponents(); //rgb(31,32,35)
-        parserPanel.setBackground(new Color(105,120,165) );
+        ImageIcon img = new ImageIcon("./icon32.png");
+        this.setIconImage(img.getImage());
+        initComponents(); //rgb(31,32,35) 
+        //this.getContentPane().setBackground(new Color(31,32,35));
+        //this.getContentPane().setForeground(Color.WHITE);
+        parserPanel.setBackground(new Color(122, 148, 167));
         parserPanel.setForeground(Color.WHITE);
-        tableErrors.setBackground(new Color(105,120,165) );
+        tableErrors.setBackground(new Color(122, 148, 167));
         tableErrors.setForeground(Color.WHITE);
-        semanticPanel.setBackground(new Color(105,120,165) );
+        semanticPanel.setBackground(new Color(122, 148, 167));
         semanticPanel.setForeground(Color.WHITE);
-        stPanel.setBackground(new Color(105,120,165) );
+        stPanel.setBackground(new Color(122, 148, 167));
         stPanel.setForeground(Color.WHITE);
     }
     
@@ -55,7 +60,7 @@ public class Compiler extends javax.swing.JFrame {
         
         tableErrors.setAutoCreateRowSorter(true);
         tableErrors.setModel(model);
-        tableErrors.setBackground(new Color(105,120,165));
+        tableErrors.setBackground(new Color(122, 148, 167));
     }
 
     /**
@@ -98,6 +103,7 @@ public class Compiler extends javax.swing.JFrame {
             }
         });
 
+        tableErrors.setBackground(new java.awt.Color(105, 120, 165));
         tableErrors.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
