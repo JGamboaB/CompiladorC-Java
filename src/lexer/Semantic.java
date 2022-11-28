@@ -287,7 +287,7 @@ public class Semantic {
         semanticStack.push(DO);  
     }
       
-    public void evalUnary(Symbol s){ //incremento (Var), decremento (Var)
+    public static void evalUnary(int iright, int ileft){ //incremento (Var), decremento (Var)
         RegisterDo DO1 = semanticStack.popRegisterDo();
         String DO1val = DO1.getValue();
         RegisterOperator OP = semanticStack.popRegisterOperator();//pop operands and operator 
@@ -296,7 +296,7 @@ public class Semantic {
         // Check it's type can be used in operation -- Anything except string
         
         if (DO1.getType() != KindDo.ADDRESS){ //Not a Variable
-            semanticErrors += "Error (Line: " + (s.right+1) + ", Column: " + (s.left + 1) + ", Value: " + s.value
+            semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + DO1val
                             + "): Invalid mix of operand(s) with operation.\n\n";
             return; // EXIT AND DON'T ADD ANYTHING TO THE STACK
         }

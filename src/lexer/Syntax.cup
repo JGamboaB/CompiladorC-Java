@@ -77,7 +77,7 @@ postfix_expression
 	| postfix_expression LPAR RPAR
 	| postfix_expression LPAR argument_expression_list RPAR
 	| postfix_expression DOT ID
-	| postfix_expression OPINCDEC // #evalUnary
+	| postfix_expression OPINCDEC:i {: Semantic.rememberOP(i.toString()); Semantic.evalUnary(iright, ileft); :} // #evalUnary
 	;
 
 argument_expression_list
@@ -87,7 +87,7 @@ argument_expression_list
 
 unary_expression
 	::= postfix_expression
-	| OPINCDEC unary_expression // #evalUnary
+	| OPINCDEC:i {: Semantic.rememberOP(i.toString()); :} unary_expression {: Semantic.evalUnary(-1, -1); :} // #evalUnary
 	| unary_operator cast_expression 
 	;
 
