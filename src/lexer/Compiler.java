@@ -214,6 +214,7 @@ public class Compiler extends javax.swing.JFrame {
             stPanel.setText(Semantic.getTextST());
             Semantic.printSemanticStack();
             System.out.println(Semantic.getGeneratedCode());
+            Semantic.generateNASMFile(f.getName());
             //Semantic.printST();
             //Semantic.printErrors();
             Semantic.newRun();

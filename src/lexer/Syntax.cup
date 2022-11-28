@@ -244,8 +244,8 @@ declaration
 /*  FUNCTION DECLARATIONS */
 
 jump_statement
-	::= CONTINUE SEMICOLON
-	| BREAK SEMICOLON
+	::= CONTINUE SEMICOLON:i {: Semantic.registerContinue(iright, ileft); :}
+	| BREAK SEMICOLON:i {: Semantic.registerBreak(iright, ileft); :}
 	| RETURN SEMICOLON
 	| RETURN expression SEMICOLON
         | CONTINUE error SEMICOLON {: parser.report_error("Expected ';' after continue"); :}

@@ -1,8 +1,6 @@
 package lexer;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java_cup.runtime.Symbol;
 import lexer.SemanticRegisters.KindDo;
 import lexer.SemanticRegisters.RegisterCompoundStatement;
 import lexer.SemanticRegisters.RegisterDo;
@@ -12,7 +10,11 @@ import lexer.SemanticRegisters.RegisterOperator;
 import lexer.SemanticRegisters.RegisterType;
 import lexer.SemanticRegisters.RegisterVar;
 import lexer.SemanticRegisters.RegisterWhile;
-import lexer.SemanticRegisters.iRegister;
+
+import java.io.File;  // Import the File class
+import java.io.FileWriter;
+import java.io.IOException;  // Import the IOException class to handle errors
+
 
 public class Semantic {
     private static SemanticStack semanticStack = new SemanticStack();
@@ -236,36 +238,36 @@ public class Semantic {
             String DO1valcopy = DO1val;
             
             if (DO1.getType() == KindDo.ADDRESS)
-                DO1val = "word ["+DO1val+"]";
+                DO1val = "DWORD ["+DO1val+"]";
                  
             if (DO2.getType() == KindDo.ADDRESS)
-                DO2val = "word ["+DO2val+"]";
+                DO2val = "DWORD ["+DO2val+"]";
             
             switch(OP.getValue()){
                 case "+" -> {
-                    generatedCode += "MOV BX, " + DO1val + "\n" +
-                            "MOV CX, " + DO2val + "\n" +
-                            "ADD BX, CX\n\n";
+                    generatedCode += "\tMOV BX, " + DO1val + "\n" +
+                            "\tMOV CX, " + DO2val + "\n" +
+                            "\tADD BX, CX\n\n";
                     DO = new RegisterDo("BX", KindDo.MEMORY);
                 } case "-" -> {
-                    generatedCode += "MOV BX, " + DO1val + "\n" +
-                            "MOV CX, " + DO2val + "\n" +
-                            "SUB BX, CX\n\n";
+                    generatedCode += "\tMOV BX, " + DO1val + "\n" +
+                            "\tMOV CX, " + DO2val + "\n" +
+                            "\tSUB BX, CX\n\n";
                     DO = new RegisterDo("BX", KindDo.MEMORY);
                 } case "*" -> {                  
-                    generatedCode += "MOV AX, " + DO1val + "\n" +
-                            "MOV BX, " + DO2val + "\n" +
-                            "MUL BL\n\n";
+                    generatedCode += "\tMOV AX, " + DO1val + "\n" +
+                            "\tMOV BX, " + DO2val + "\n" +
+                            "\tMUL BL\n\n";
                     DO = new RegisterDo("AX", KindDo.MEMORY);
                 } case "/" -> {
-                    generatedCode += "MOV AX, " + DO1val + "\n" + //Must Check That AX & BX not used anywhere else in the Stack ??
-                            "MOV BX, " + DO2val + "\n" +
-                            "DIV BL\nxor AH, AH\n\n";
+                    generatedCode += "\tMOV AX, " + DO1val + "\n" + //Must Check That AX & BX not used anywhere else in the Stack ??
+                            "\tMOV BX, " + DO2val + "\n" +
+                            "\tDIV BL\nxor AH, AH\n\n";
                     DO = new RegisterDo("AX", KindDo.MEMORY);
                 } default -> {
                     //Assignment  
                     if (DO1.getType() == KindDo.ADDRESS){ //Validate DO1 is ADDRESS
-                        generatedCode += "mov " + DO1val + ", " + DO2val +"\n\n";
+                        generatedCode += "\tMOV " + DO1val + ", " + DO2val +"\n\n";
                         DO = new RegisterDo(DO1valcopy, KindDo.ADDRESS);
                     } else { //ERROR
                         semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + i
@@ -295,37 +297,37 @@ public class Semantic {
 
         switch(OP.getValue()){
             case "==" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "CMP BX, "+ DO2val +"\n" +
-                        "JNZ ";
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tCMP BX, "+ DO2val +"\n" +
+                        "\tJNZ ";
             } case "!=" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "CMP BX, "+ DO2val +"\n" +
-                        "JZ ";
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tCMP BX, "+ DO2val +"\n" +
+                        "\tJZ ";
             } case ">=" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "CMP BX, "+ DO2val +"\n" +
-                        "JL ";
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tCMP BX, "+ DO2val +"\n" +
+                        "\tJL ";
             } case ">" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "CMP BX, "+ DO2val +"\n" +
-                        "JLE ";
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tCMP BX, "+ DO2val +"\n" +
+                        "\tJLE ";
             } case "<=" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "CMP BX, "+ DO2val +"\n" +
-                        "JG ";
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tCMP BX, "+ DO2val +"\n" +
+                        "\tJG ";
             } case "<" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "CMP BX, "+ DO2val +"\n" +
-                        "JGE ";  
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tCMP BX, "+ DO2val +"\n" +
+                        "\tJGE ";  
             } case "&&" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "TEST BX, "+ DO2val +"\n" +
-                        "JZ ";  
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tTEST BX, "+ DO2val +"\n" +
+                        "\tJZ ";  
             } case "||" -> {
-                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
-                        "OR BX, "+ DO2val +"\n" +
-                        "JZ ";  
+                generatedCode += "\tMOV BX, " + DO1val + "\n" + //Const or Address
+                        "\tOR BX, "+ DO2val +"\n" +
+                        "\tJZ ";  
             }
         } 
     }
@@ -345,8 +347,8 @@ public class Semantic {
         }
         
         switch (OP.getValue()){
-            case "++" -> generatedCode += "INC word [" + DO1val + "]\n\n";
-            case "--" -> generatedCode += "DEC word [" + DO1val + "]\n\n";
+            case "++" -> generatedCode += "\tINC DWORD [" + DO1val + "]\n\n";
+            case "--" -> generatedCode += "\tDEC DWORD [" + DO1val + "]\n\n";
         }
         
         RegisterDo DO = new RegisterDo(DO1val, KindDo.ADDRESS);
@@ -378,7 +380,7 @@ public class Semantic {
     }
     
     public static void startElse(){
-        generatedCode += "JMP " + semanticStack.peekRegisterIf().getLabelExit() + "\n\n";
+        generatedCode += "\tJMP " + semanticStack.peekRegisterIf().getLabelExit() + "\n\n";
         generatedCode += semanticStack.peekRegisterIf().getLabelElse() + ":\n"; 
     }
     
@@ -410,7 +412,7 @@ public class Semantic {
     }
     
     public static void endWhile(){
-        generatedCode += "JMP " + semanticStack.peekRegisterWhile().getLabelWhile() + "\n\n";  // JUMP WHILE_LABEL1
+        generatedCode += "\tJMP " + semanticStack.peekRegisterWhile().getLabelWhile() + "\n\n";  // JUMP WHILE_LABEL1
         generatedCode += semanticStack.peekRegisterWhile().getLabelExit() + ":\n"; // EXIT_LABEL:
         semanticStack.popRegisterWhile();
     }    
@@ -449,7 +451,7 @@ public class Semantic {
             ToDo: (maybe) implementar analisis semantico para el for (no generacion de codigo)
         */
     
-    public void registerContinue(int iright, int ileft){  
+    public static void registerContinue(int iright, int ileft){  
         if(semanticStack.peekRegisterWhile() == null)
             semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: 'continue'): Continue outside of Loop.\n\n";
         
@@ -459,7 +461,7 @@ public class Semantic {
         } else {// ToDo: reportar error
         }*/
     }
-    public void registerBreak(int iright, int ileft){
+    public static void registerBreak(int iright, int ileft){
         if(semanticStack.peekRegisterWhile() == null)
             semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: 'break'): Continue outside of Loop.\n\n";
 
@@ -490,14 +492,37 @@ public class Semantic {
         return symbol1.getType().equals(symbol2.getType());
     }
     
+    public static void nasmVars(){
+        String code = "%include \"io.mac\"\n.UDATA\n";
+        String reserve = "";
+        for (STNode n: ST){
+            switch(n.getType()){
+                case "char" -> reserve = "RESB";
+                case "short" ->reserve = "RESB";
+                case "int" ->  reserve = "RESD";
+                case "long" -> reserve = "RESQ";
+                case "function" -> {continue;}
+            }
+            code += "\t"+n.getSymbolName()+"\t\t"+reserve+" 1\n";
+        } code += "\n.CODE\n\n\t.STARTUP\n";
+        generatedCode = code + generatedCode + "\t.EXIT";
+    }
     
+    public static void generateNASMFile(String filename){ //.c
+        //String filename = "a.c"; //
+
+        nasmVars();
+        filename = filename.substring(0, filename.length() - 2) + ".asm";
+       
+        try {
+            File file = new File("./NASM/"+filename);
+            file.createNewFile();
+            FileWriter fw = new FileWriter(file);
+            fw.write(generatedCode);
+            fw.close();
+        } catch (IOException e) {
+          System.out.println("An error occurred.");
+          e.printStackTrace();
+        }
+    } 
 }
-
-/*
-TO DO:
-evalLogical / evalBoolean <-- Solo en IFs y Whiles
-
-IF, WHILE
-
-Documentacion
-*/
