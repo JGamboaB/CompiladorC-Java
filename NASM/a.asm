@@ -1,0 +1,57 @@
+%include "io.mac"
+.UDATA
+	c		RESD 1
+	b		RESD 1
+	a		RESD 1
+	e		RESB 1
+	d		RESB 1
+
+.CODE
+
+	.STARTUP
+	MOV WORD [a], 5
+
+	MOV BX, WORD [a]
+	MOV CX, 3
+	ADD BX, CX
+
+	MOV WORD [b], BX
+
+	MOV WORD [c], 7
+
+	MOV BX, 1
+	MOV CX, WORD [d]
+	ADD BX, CX
+
+	MOV WORD [a], BX
+
+	MOV WORD [d], 'a'
+
+	INC DWORD [b]
+
+	INC DWORD [d]
+
+	MOV BX, [b]
+	CMP BX, 1
+	JL ELSE_LABEL0
+	INC DWORD [a]
+
+	JMP EXIT_LABEL1
+
+ELSE_LABEL0:
+	INC DWORD [c]
+
+EXIT_LABEL1:
+	INC DWORD [c]
+
+WHILE_LABEL2:
+	MOV BX, [b]
+	CMP BX, [a]
+	JLE EXIT_LABEL3
+
+	INC DWORD [a]
+
+	JMP WHILE_LABEL2
+
+EXIT_LABEL3:
+	.EXIT
