@@ -56,7 +56,7 @@ non terminal primary_expression, postfix_expression, argument_expression_list,
     parameter_list, identifier_list, declarator, initializer_list, initializer, init_declarator, 
     init_declarator_list, declaration_specifiers, declaration,  jump_statement, iteration_statement,
     selection_statement, expression_statement, labeled_statement, statement, statement_list, instruction_statement,
-    compound_statement, declaration_list, void_specifier, func_declaration, declarations, program
+    compound_statement, declaration_list, void_specifier, func_declaration, declarations, program, else_stmt
 ;
 
 start with program;
@@ -132,22 +132,22 @@ additive_expression
 
 relational_expression
 	::= additive_expression
-	| relational_expression OPRELATIONAL additive_expression // #evalLogical
+	| relational_expression OPRELATIONAL:i {: Semantic.rememberOP(i.toString()); :} additive_expression {: Semantic.evalLogical("", -1, -1); :} // #evalLogical
 	;
 
 equality_expression
 	::= relational_expression
-	| equality_expression OPEQUALITY relational_expression // #evalLogical 1==2-1 
+	| equality_expression OPEQUALITY:i {: Semantic.rememberOP(i.toString()); :} relational_expression {: Semantic.evalLogical("", -1, -1); :} // #evalLogical 1==2-1 
 	;
 
 logical_and_expression
 	::= equality_expression
-	| logical_and_expression AND equality_expression // #evalLogical
+	| logical_and_expression AND:i {: Semantic.rememberOP(i.toString()); :} equality_expression {: Semantic.evalLogical("", -1, -1); :} // #evalLogical
 	;
 
 logical_or_expression
 	::= logical_and_expression
-	| logical_or_expression OR logical_and_expression // #evalLogical
+	| logical_or_expression OR:i {: Semantic.rememberOP(i.toString()); :} logical_and_expression {: Semantic.evalLogical("", -1, -1); :} // #evalLogical
 	;
 
 assignment_expression
@@ -254,7 +254,7 @@ jump_statement
 	;
 
 iteration_statement 
-	::= WHILE LPAR expression RPAR compound_statement
+	::= WHILE {: Semantic.startWhile(); :} LPAR expression RPAR {: Semantic.testWhile(); :} compound_statement {: Semantic.endWhile(); :}
         | WHILE error compound_statement {: parser.report_error("'while' error"); :}
 	| DO compound_statement WHILE LPAR expression RPAR SEMICOLON    // NO SE OCUPA
         | DO error SEMICOLON {: parser.report_error("'do' error"); :}   // NO SE OCUPA
@@ -264,9 +264,13 @@ iteration_statement
         | FOR error compound_statement {: parser.report_error("'for' error"); :}
         ;
 
+else_stmt
+        ::= compound_statement {: Semantic.startElse(); Semantic.endIf(); :}
+        | compound_statement ELSE {: Semantic.startElse(); :} statement {: Semantic.endIf(); :}
+        ;
+
 selection_statement
-	::= IF LPAR expression RPAR compound_statement ELSE statement
-        | IF LPAR expression RPAR compound_statement
+	::= IF {: Semantic.startIf(); :} LPAR expression RPAR {: Semantic.testIf(); :} else_stmt 
         | IF error compound_statement {: parser.report_error("'if' error"); :}
 	| SWITCH LPAR NUMBERLITERAL RPAR compound_statement
         | SWITCH LPAR CHARLITERAL RPAR compound_statement

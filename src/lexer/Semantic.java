@@ -39,7 +39,6 @@ public class Semantic {
         private String returnType;
         private String scope; //Global, Local, Function-Parameter
         private String line;
-        private String nasm;
 
         public STNode(String symbolName, String type, String returnType, String line) { //Function
             this.symbolName = symbolName;
@@ -58,26 +57,24 @@ public class Semantic {
         public void print() {
             System.out.println("Name: " + this.symbolName + "\t" +
                 "Type: " + this.type + "\t" + "Return-type: " + this.returnType + "\t" +
-                "Scope: " + this.scope + "\t" + "Line: " + this.line + " NASM_Name: " + this.nasm);
+                "Scope: " + this.scope + "\t" + "Line: " + this.line + "\n");
         }
         
         public String getText(){
             return "Name: " + this.symbolName + "\t" +
                 "Type: " + this.type + "\t" + "Return-type: " + this.returnType + "\t" +
-                "Scope: " + this.scope + "\t" + "Line: " + this.line + " NASM_Name: " + this.nasm + "\n\n";
+                "Scope: " + this.scope + "\t" + "Line: " + this.line + "\n\n";
         }
         
         public String getSymbolName() { return symbolName; }
         public String getType() { return type; }
         public String getReturnType() { return returnType; }
         public String getLine() { return line; }
-        public String getNasm() {return nasm;}
         
         public void setSymbolName(String symbolName) { this.symbolName = symbolName; }
         public void setType(String type) { this.type = type; }
         public void setReturnType(String returnType) { this.returnType = returnType; }
         public void setLine(String line) { this.line = line; }
-        public void setNasm(String nasm) {this.nasm = nasm;}
         public void setScope(String s) {this.scope = s;}
     }
     
@@ -140,8 +137,6 @@ public class Semantic {
             if(registerId != null){
                 if(!containsSymbolName(registerId.getName())){ // Validar que no esté en tabla de simbolos.
                     STNode n = new STNode(registerId.getName(), registerType.getType(), String.valueOf(iright+1));
-                    //n.setNasm(getNextLabel(registerId.getName()));
-                    n.setNasm(registerId.getName());
                     ST.add(n);
                     semanticStack.push(new RegisterVar(registerId.getName()));
                 } else { //Reportar error que esta.
@@ -163,8 +158,6 @@ public class Semantic {
         while (RID != RID_func){ //Parameters here
             if (!containsSymbolName(RID.getName())){ //No en la tabla de simbolos
                 STNode n = new STNode(RID.getName(), RType.getType(), String.valueOf(iright+1));
-                //n.setNasm(getNextLabel(RID.getName()));
-                n.setNasm(RID.getName());
                 n.setScope("Function-parameter");
                 ST.add(n);
                 semanticStack.push(new RegisterVar(RID.getName()));
@@ -180,8 +173,6 @@ public class Semantic {
         
         if(!containsSymbolName(RID.getName())){ // Validar que no esté en tabla de simbolos.
             STNode n = new STNode(RID.getName(), "function",RType.getType(), String.valueOf(iright+1));
-            //n.setNasm(getNextLabel(RID.getName()));
-            n.setNasm(RID.getName());
             n.setScope("Global");
             ST.add(n);
             semanticStack.push(new RegisterVar(RID.getName()));
@@ -191,7 +182,7 @@ public class Semantic {
         }
     }
     
-    // Traduccion de expresiones --> Strings ignorados
+    // Traduccion de expresiones
     public static void rememberConst(String s){
         semanticStack.push( new RegisterDo(s, KindDo.CONSTANT));
     }
@@ -245,36 +236,36 @@ public class Semantic {
             String DO1valcopy = DO1val;
             
             if (DO1.getType() == KindDo.ADDRESS)
-                DO1val = "word ["+returnNode(DO1val).nasm+"]"; //get NASMname from TABLE
+                DO1val = "word ["+DO1val+"]";
                  
             if (DO2.getType() == KindDo.ADDRESS)
-                DO2val = "word ["+returnNode(DO2val).nasm+"]"; //get NASMname from TABLE
+                DO2val = "word ["+DO2val+"]";
             
             switch(OP.getValue()){
                 case "+" -> {
-                    generatedCode += "mov BX, " + DO1val + "\n" +
-                            "mov CX, " + DO2val + "\n" +
-                            "add BX, CX\n";
+                    generatedCode += "MOV BX, " + DO1val + "\n" +
+                            "MOV CX, " + DO2val + "\n" +
+                            "ADD BX, CX\n\n";
                     DO = new RegisterDo("BX", KindDo.MEMORY);
                 } case "-" -> {
-                    generatedCode += "mov BX, " + DO1val + "\n" +
-                            "mov CX, " + DO2val + "\n" +
-                            "sub BX, CX\n";
+                    generatedCode += "MOV BX, " + DO1val + "\n" +
+                            "MOV CX, " + DO2val + "\n" +
+                            "SUB BX, CX\n\n";
                     DO = new RegisterDo("BX", KindDo.MEMORY);
                 } case "*" -> {                  
-                    generatedCode += "mov AX, " + DO1val + "\n" +
-                            "mov BX, " + DO2val + "\n" +
-                            "mul BL\n";
+                    generatedCode += "MOV AX, " + DO1val + "\n" +
+                            "MOV BX, " + DO2val + "\n" +
+                            "MUL BL\n\n";
                     DO = new RegisterDo("AX", KindDo.MEMORY);
                 } case "/" -> {
-                    generatedCode += "mov AX, " + DO1val + "\n" + //Must Check That AX & BX not used anywhere else in the Stack ??
-                            "mov BX, " + DO2val + "\n" +
-                            "div BL\nxor AH, AH\n";
+                    generatedCode += "MOV AX, " + DO1val + "\n" + //Must Check That AX & BX not used anywhere else in the Stack ??
+                            "MOV BX, " + DO2val + "\n" +
+                            "DIV BL\nxor AH, AH\n\n";
                     DO = new RegisterDo("AX", KindDo.MEMORY);
                 } default -> {
                     //Assignment  
                     if (DO1.getType() == KindDo.ADDRESS){ //Validate DO1 is ADDRESS
-                        generatedCode += "mov " + DO1val + ", " + DO2val +"\n";
+                        generatedCode += "mov " + DO1val + ", " + DO2val +"\n\n";
                         DO = new RegisterDo(DO1valcopy, KindDo.ADDRESS);
                     } else { //ERROR
                         semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + i
@@ -285,6 +276,58 @@ public class Semantic {
             }
         } // else {} //Contains Memory Address
         semanticStack.push(DO);  
+    }
+    
+    public static void evalLogical(String i, int iright, int ileft){
+        RegisterDo DO2 = semanticStack.popRegisterDo();
+        RegisterDo DO1 = semanticStack.popRegisterDo();
+        RegisterOperator OP = semanticStack.popRegisterOperator();//pop operands and operator
+        
+        // Validate Compatible Types (int, char, short, long) != string /////////////// -> Try Catch ???
+        String DO1val = DO1.getValue();
+        String DO2val = DO2.getValue();
+        
+        if (DO1.getType() == KindDo.ADDRESS)
+            DO1val = "["+DO1val+"]";
+
+        if (DO2.getType() == KindDo.ADDRESS)
+            DO2val = "["+DO2val+"]";
+
+        switch(OP.getValue()){
+            case "==" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "CMP BX, "+ DO2val +"\n" +
+                        "JNZ ";
+            } case "!=" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "CMP BX, "+ DO2val +"\n" +
+                        "JZ ";
+            } case ">=" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "CMP BX, "+ DO2val +"\n" +
+                        "JL ";
+            } case ">" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "CMP BX, "+ DO2val +"\n" +
+                        "JLE ";
+            } case "<=" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "CMP BX, "+ DO2val +"\n" +
+                        "JG ";
+            } case "<" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "CMP BX, "+ DO2val +"\n" +
+                        "JGE ";  
+            } case "&&" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "TEST BX, "+ DO2val +"\n" +
+                        "JZ ";  
+            } case "||" -> {
+                generatedCode += "MOV BX, " + DO1val + "\n" + //Const or Address
+                        "OR BX, "+ DO2val +"\n" +
+                        "JZ ";  
+            }
+        } 
     }
       
     public static void evalUnary(int iright, int ileft){ //incremento (Var), decremento (Var)
@@ -302,8 +345,8 @@ public class Semantic {
         }
         
         switch (OP.getValue()){
-            case "++" -> generatedCode += "inc word [" + returnNode(DO1val).nasm + "]\n";
-            case "--" -> generatedCode += "dec word [" + returnNode(DO1val).nasm + "]\n";
+            case "++" -> generatedCode += "INC word [" + DO1val + "]\n\n";
+            case "--" -> generatedCode += "DEC word [" + DO1val + "]\n\n";
         }
         
         RegisterDo DO = new RegisterDo(DO1val, KindDo.ADDRESS);
@@ -315,61 +358,59 @@ public class Semantic {
         /*
             -> selection_statement
             IF #startIf LPAR expression RPAR #testIf compound_statement ELSE #startElse statement #endIf
-            IF #startIf LPAR expression RPAR #testIf compound_statement #endif 
+            IF #startIf LPAR expression RPAR #testIf compound_statement #endif    
         */
     
-    public void startIf(){
-        RegisterIf registerIf = new RegisterIf();// crear RS_IF
-        
-        registerIf.setLabelElse(getNextLabel("ELSE_LABEL")); // asignar 2 nombres de labels
-        registerIf.setLabelExit(getNextLabel("EXIT_LABEL"));
-        
-        semanticStack.push(registerIf); //Push RS_IF
+    public static void startIf(){
+        RegisterIf IF = new RegisterIf();// crear RS_IF
+        IF.setLabelElse(getNextLabel("ELSE_LABEL")); // asignar 2 nombres de labels
+        IF.setLabelExit(getNextLabel("EXIT_LABEL"));
+        semanticStack.push(IF); //Push RS_IF
     }
     
-    public void testIf(){ //Generar con sus JUMPS respectivos
-        RegisterDo registerDo = semanticStack.popRegisterDo(); // este DO viene de un #evalBinary, trae el registro en value
+    public static void testIf(){ //Generar con sus JUMPS respectivos
+        generatedCode += semanticStack.peekRegisterIf().getLabelElse() + "\n"; //Else label //Used as exit if there's no else
+        
+        //RegisterDo registerDo = semanticStack.popRegisterDo(); // este DO viene de un #evalBinary, trae el registro en value
         // ToDo: generar el codigo de la evaluacion segun la direccion de registerDo -> CMP [registro], 0 (?)
-        generatedCode += "CMP ";
-        generatedCode += "JZ " +semanticStack.peekRegisterIf().getLabelElse() + "\n"; // generar jump condicional con RS_IF.else_label
+        //generatedCode += "CMP ";
+        //generatedCode += "JZ " + label + "\n"; // generar jump condicional con RS_IF.else_label
     }
     
-    public void startElse(){
-        generatedCode += "JUMP " + semanticStack.peekRegisterIf().getLabelExit() + "\n";
+    public static void startElse(){
+        generatedCode += "JMP " + semanticStack.peekRegisterIf().getLabelExit() + "\n\n";
         generatedCode += semanticStack.peekRegisterIf().getLabelElse() + ":\n"; 
     }
     
-    public void endIf(){
+    public static void endIf(){
         generatedCode += semanticStack.peekRegisterIf().getLabelExit() + ":\n";
         semanticStack.popRegisterIf();
     }
     
     // Acciones Semanticas para WHILE
-        /*
-            -> iteration_statement
+        /* -> iteration_statement
             WHILE #startWhile LPAR expression RPAR #testWhile compound_statement #endWhile
         */
     
-    public void startWhile(){
-        RegisterWhile registerWhile = new RegisterWhile(); // crear RS_WHILE
-        
-        registerWhile.setLabelWhile(getNextLabel("WHILE_LABEL")); // ASIGNAR 2 LABELS
-        registerWhile.setLabelExit(getNextLabel("EXIT_LABEL"));
-        
-        generatedCode += registerWhile.getLabelWhile() + ":\n"; // general RS_WHILE.while_label + ":"
-        
-        semanticStack.push(registerWhile); // push RS_WHILE
+    public static void startWhile(){
+        RegisterWhile WHILE = new RegisterWhile(); // crear RS_WHILE
+        WHILE.setLabelWhile(getNextLabel("WHILE_LABEL")); // ASIGNAR 2 LABELS
+        WHILE.setLabelExit(getNextLabel("EXIT_LABEL"));
+        generatedCode += WHILE.getLabelWhile() + ":\n"; // general RS_WHILE.while_label + ":"
+        semanticStack.push(WHILE); // push RS_WHILE
         
     }
     
-    public void testWhile(){
-        RegisterDo registerDo = semanticStack.popRegisterDo();
+    public static void testWhile(){
+        generatedCode += semanticStack.peekRegisterWhile().getLabelExit() + "\n\n";
+        
+        //RegisterDo registerDo = semanticStack.popRegisterDo();
         // ToDo: generar el codigo de la evaluacion segun la direccion de registerDo
-        generatedCode += "JZ " + semanticStack.peekRegisterWhile().getLabelExit()+"/n"; // generar jump condicional con RS_WHILE.exit_label
+        //generatedCode += "JZ " + semanticStack.peekRegisterWhile().getLabelExit()+"/n"; // generar jump condicional con RS_WHILE.exit_label
     }
     
-    public void endWhile(){
-        generatedCode += "JUMP" + semanticStack.peekRegisterWhile().getLabelWhile() + "\n";  // JUMP WHILE_LABEL1
+    public static void endWhile(){
+        generatedCode += "JMP " + semanticStack.peekRegisterWhile().getLabelWhile() + "\n\n";  // JUMP WHILE_LABEL1
         generatedCode += semanticStack.peekRegisterWhile().getLabelExit() + ":\n"; // EXIT_LABEL:
         semanticStack.popRegisterWhile();
     }    
@@ -408,23 +449,28 @@ public class Semantic {
             ToDo: (maybe) implementar analisis semantico para el for (no generacion de codigo)
         */
     
-    public void registerContinue(){       
+    public void registerContinue(int iright, int ileft){  
+        if(semanticStack.peekRegisterWhile() == null)
+            semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: 'continue'): Continue outside of Loop.\n\n";
+        
+        /*
         if(semanticStack.peekRegisterWhile()!=null){
-            generatedCode += "JUMP" + semanticStack.peekRegisterWhile().getLabelWhile()+"/n";
-        } else {
-            // ToDo: reportar error
-        }
+            generatedCode += "JMP" + semanticStack.peekRegisterWhile().getLabelWhile()+"\n";
+        } else {// ToDo: reportar error
+        }*/
     }
-    public void registerBreak(){
+    public void registerBreak(int iright, int ileft){
+        if(semanticStack.peekRegisterWhile() == null)
+            semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: 'break'): Continue outside of Loop.\n\n";
+
+        /*
         if(semanticStack.peekRegisterWhile()!=null){
-            generatedCode += "JUMP" + semanticStack.peekRegisterWhile().getLabelExit()+"/n";
-        } else {
-            // ToDo: reportar error
-        }
+            generatedCode += "JMP" + semanticStack.peekRegisterWhile().getLabelExit()+"\n";
+        } else { // ToDo: reportar error
+        }*/
     }
     
     // auxiliary functions
-    
     public static String getNextLabel(String labelName) {
         return labelName + sequenceNumber++;
     }
@@ -445,22 +491,13 @@ public class Semantic {
     }
     
     
-    //Function <---
-    
 }
 
 /*
 TO DO:
-Usar RX en evalBinary y que se inserte correctamente en la tabla;
 evalLogical / evalBoolean <-- Solo en IFs y Whiles
-evalUnary
-// active <- desactivar valores de ST
 
 IF, WHILE
-Functions
-
-Meter en sintaxis
-Terminar UI
 
 Documentacion
 */
