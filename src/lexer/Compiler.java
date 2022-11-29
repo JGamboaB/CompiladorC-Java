@@ -195,6 +195,8 @@ public class Compiler extends javax.swing.JFrame {
         JFileChooser chooser = new JFileChooser();
         chooser.showOpenDialog(null);
         
+        Semantic.newRun(); 
+        
         File f = chooser.getSelectedFile();
         String filename = f.getAbsolutePath();
         jLabel3.setHorizontalAlignment(JLabel.CENTER);
@@ -219,7 +221,7 @@ public class Compiler extends javax.swing.JFrame {
             semanticPanel.setText(Semantic.getErrors());
             stPanel.setText(Semantic.getTextST());
             Semantic.printSemanticStack();
-            System.out.println(Semantic.getGeneratedCode());
+            //System.out.println(Semantic.getGeneratedCode());
             Semantic.generateNASMFile(f.getName());
             //Semantic.printST();
             //Semantic.printErrors();

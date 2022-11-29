@@ -8,7 +8,7 @@ parser code
     private Symbol s;
     public static int errors = 0;
     public String errorMSG = "";
-    public String scope = "global";
+    public String scope = "Global";
 
     public void syntax_error(Symbol s){
         this.s = s;
@@ -23,11 +23,11 @@ parser code
     }
 
     public void setGlobal(){
-        this.scope = "global";
+        this.scope = "Global";
     }
 
     public void setLocal(){
-        this.scope = "local";
+        this.scope = "Local";
     }
 
     public String getErrors(){
@@ -346,7 +346,7 @@ void_specifier
 func_declaration
 	::= declaration_specifiers declarator declaration_list compound_statement
         | void_specifier declarator declaration_list compound_statement 
-	| declaration_specifiers declarator compound_statement
+	| declaration_specifiers declarator compound_statement {: System.out.println("Here"); :}
         | void_specifier declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
