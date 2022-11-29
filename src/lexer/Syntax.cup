@@ -23,11 +23,11 @@ parser code
     }
 
     public void setGlobal(){
-        this.scope = "Global";
+        this.scope = "Global ";
     }
 
     public void setLocal(){
-        this.scope = "Local";
+        this.scope = "Local ";
     }
 
     public String getErrors(){
@@ -346,7 +346,7 @@ void_specifier
 func_declaration
 	::= declaration_specifiers declarator declaration_list compound_statement
         | void_specifier declarator declaration_list compound_statement 
-	| declaration_specifiers declarator compound_statement {: System.out.println("Here"); :}
+	| declaration_specifiers declarator compound_statement
         | void_specifier declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement

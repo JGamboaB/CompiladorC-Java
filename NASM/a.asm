@@ -5,7 +5,7 @@
 	a		RESD 1
 	e		RESB 1
 	dev		RESQ 1
-	d		RESB 1
+	d		RESD 1
 	we		RESB 1
 
 .CODE

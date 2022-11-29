@@ -141,7 +141,7 @@ public class Semantic {
                     STNode n = new STNode(registerId.getName(), registerType.getType(), String.valueOf(iright+1));
                     n.setScope(scope);
                     ST.add(n);
-                    semanticStack.push(new RegisterVar(registerId.getName()));
+                    //semanticStack.push(new RegisterVar(registerId.getName()));
                 } else { //Reportar error que esta.
                     semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + registerId.getName()
                             + "'): Name already used to declare a variable/function.\n\n";
@@ -163,7 +163,7 @@ public class Semantic {
                 STNode n = new STNode(RID.getName(), RType.getType(), String.valueOf(iright+1));
                 n.setScope("Function-parameter");
                 ST.add(n);
-                semanticStack.push(new RegisterVar(RID.getName()));
+                //semanticStack.push(new RegisterVar(RID.getName()));
             } else {
                 semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + RID.getName()
                     + "'): Name already used to declare a variable/function/parameter.\n\n";
@@ -178,7 +178,7 @@ public class Semantic {
             STNode n = new STNode(RID.getName(), "function",RType.getType(), String.valueOf(iright+1));
             n.setScope("Global");
             ST.add(n);
-            semanticStack.push(new RegisterVar(RID.getName()));
+            //semanticStack.push(new RegisterVar(RID.getName()));
         } else { //Reportar error que esta.
             semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: '" + RID.getName()
                 + "'): Name already used to declare a variable/function.\n\n";
