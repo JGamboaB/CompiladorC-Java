@@ -8,6 +8,7 @@ parser code
     private Symbol s;
     public static int errors = 0;
     public String errorMSG = "";
+    public String scope = "global";
 
     public void syntax_error(Symbol s){
         this.s = s;
@@ -15,6 +16,18 @@ parser code
 
     public Symbol getS(){
         return this.s;
+    }
+
+    public String getScope(){
+        return scope;
+    }
+
+    public void setGlobal(){
+        this.scope = "global";
+    }
+
+    public void setLocal(){
+        this.scope = "local";
     }
 
     public String getErrors(){
@@ -236,7 +249,7 @@ declaration_specifiers
 
 declaration
 	::= declaration_specifiers SEMICOLON
-	| declaration_specifiers init_declarator_list SEMICOLON:i {: Semantic.declInsertTS(i.toString(), iright, ileft); Semantic.printST(); Semantic.printErrors(); Semantic.printSemanticStack(); :}
+	| declaration_specifiers init_declarator_list SEMICOLON:i {: Semantic.declInsertTS(i.toString(), iright, ileft, parser.getScope()); Semantic.printST(); Semantic.printErrors(); Semantic.printSemanticStack(); :}
         | declaration_specifiers error SEMICOLON {: parser.report_error("Declaration error"); :}
 	;
 
@@ -318,12 +331,11 @@ compound_statement
 	| LBRACES statement_list RBRACES
 	| LBRACES declaration_list RBRACES
 	| LBRACES declaration_list statement_list RBRACES
-	//| LBRACES statement_list declaration_list RBRACES // como la de arriba pero invirtiendo orden (en contra del enunciado?)
         | error RBRACES {: parser.report_error("Statement"); :}
         ;
 
 declaration_list
-	::= declaration
+	::= {: parser.setLocal(); :} declaration
 	| declaration_list declaration 
 	;
 
@@ -350,6 +362,6 @@ declarations
     ;
 
 program 
-    ::=  declarations
-    |  program declarations
+    ::=  declarations {: parser.setGlobal(); :}
+    |  program declarations {: parser.setGlobal(); :}
     ;

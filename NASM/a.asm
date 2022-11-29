@@ -5,6 +5,7 @@
 	a		RESD 1
 	e		RESB 1
 	d		RESB 1
+	var		RESB 1
 
 .CODE
 
@@ -19,7 +20,7 @@
 
 	MOV WORD [c], 7
 
-	MOV BX, 1
+	MOV BX, WORD [a]
 	MOV CX, WORD [d]
 	ADD BX, CX
 

@@ -131,7 +131,7 @@ public class Semantic {
       semanticStack.push(registerId);
     }
     
-    public static void declInsertTS(String i, int iright, int ileft){ 
+    public static void declInsertTS(String i, int iright, int ileft, String scope){ 
         RegisterType registerType = semanticStack.peekRegisterType();
         RegisterId registerId;
         do {
@@ -139,6 +139,7 @@ public class Semantic {
             if(registerId != null){
                 if(!containsSymbolName(registerId.getName())){ // Validar que no esté en tabla de simbolos.
                     STNode n = new STNode(registerId.getName(), registerType.getType(), String.valueOf(iright+1));
+                    n.setScope(scope);
                     ST.add(n);
                     semanticStack.push(new RegisterVar(registerId.getName()));
                 } else { //Reportar error que esta.
@@ -205,41 +206,13 @@ public class Semantic {
         semanticStack.push(DO);
     }
     
-    public static boolean isString(String str){
-        boolean digit;
-        try {  
-            Double.valueOf(str); //Numerical
-            digit = false;
-        } catch(NumberFormatException e){  
-            digit = true;  
-        }  
-        
-        if (str.length() <= 1) //Char
-            return false;
-        return true && digit;
-    }
-    
-    
     public static void evalBinary(String i, int iright, int ileft){
         RegisterDo DO2 = semanticStack.popRegisterDo();
         RegisterDo DO1 = semanticStack.popRegisterDo();
         RegisterOperator OP = semanticStack.popRegisterOperator();//pop operands and operator
         RegisterDo DO;
-        
-        /*
-        if (DO1.getType() != KindDo.MEMORY && isString(DO1.getValue())){
-            semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + i
-                + "): Invalid mix of operand(s) with operation HERE.\n\n";
-        }
-        
-        if (DO2.getType() != KindDo.MEMORY && isString(DO2.getValue())){
-            semanticErrors += "Error (Line: " + (iright+1) + ", Column: " + (ileft + 1) + ", Value: " + i
-                + "): Invalid mix of operand(s) with operation HERE.\n\n";
-        }*/
             
-        
         // Validate Compatible Types (int, char, short, long) != string ///////////////
-        
         if(DO1.getType() == KindDo.CONSTANT && DO2.getType() == KindDo.CONSTANT) {
             int val;
 
